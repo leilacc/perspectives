@@ -1,0 +1,58 @@
+body {
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: hidden;
+}
+
+#react-hook {
+    padding: 0;
+    margin: 0;
+    height: 100vh;
+    width: 100vw;
+    background-color: rgba(0,0,0,0.5);
+    display: block;
+    position: fixed;
+    top: 0;
+    z-index: 100000;
+    animation: fadein 1s linear 0s infinite both;
+}
+
+#react-hook section {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 1em;
+    display: block;
+    height: 16vh;
+    width: 100vw;
+    background-color: white;
+    cursor: pointer;
+    transition: all 0.5s ease-out;
+    border-bottom: 1px solid #E7E7E7;
+}
+
+#react-hook section:hover {
+    background-color: #E7E7E7;
+}
+
+#react-hook section h1 {
+    padding: 0.2em;
+    margin: 0;
+    line-height: 1.5em;
+}
+
+h1:not(.react) {
+    position: relative;
+    color: white;
+    z-index: 100000000;
+}
+
+#react-hook .black {
+    display: block;
+    height: 20vh;
+    background-color: transparent;
+}
+
+@keyframes fadein {
+    from {opacity: 0}
+    to   {opacity: 1}
+}
