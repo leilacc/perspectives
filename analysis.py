@@ -35,6 +35,7 @@ def form_wn_phrase(NPleaves):
   phrase = []
   for leaf in NPleaves:
     phrase.append(leaf[0])
+  print phrase
   return '_'.join(phrase)
 
 def check_wn_phrase(NPleaves):
@@ -50,12 +51,12 @@ def check_wn_phrase(NPleaves):
     # remove leading numbers,adverbs, and adjectives that do not form a
     # commonly-used phrase according to WN
     NPleaves = NPleaves[1:]
+  print NPleaves
   return NPleaves
 
 def get_NPs(sentence):
   tokens = nltk.word_tokenize(sentence)
   tagged_tokens = nltk.pos_tag(tokens)
-  print tagged_tokens
   NPs = chunk(tagged_tokens)
 
 def chunk(pos_tagged_tokens):
