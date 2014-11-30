@@ -6,6 +6,13 @@ Assault
 Siege
 Storm
 Victim
+Attack
+Conflict
+Allegation
+Activist
+Self-defense
+Aggression
+Flotilla
 # Loaded Language Examples. (n.d.). Retrieved November 29th, 2014, from http://examples.yourdictionary.com/loaded-language-examples.html
 Accurate
 Phenomenon
