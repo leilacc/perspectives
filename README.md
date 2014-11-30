@@ -1,7 +1,9 @@
 perspectives
 ============
 
-# Al Jazeera Canvas #MediaInContext Hack
+## Al Jazeera Canvas #MediaInContext Hack
+
+### Problem
 
 Many people in the world today consult a single source on any given news item. Sometimes theadlines for the **same event** from two different news platforms may look like it is about two completely different events. Through the tool we have built, our goal is to promote the awareness of multiple perspectives on newsworthy content. 
 
