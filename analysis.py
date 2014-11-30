@@ -69,44 +69,71 @@ def chunk(pos_tagged_tokens):
 
   return chunks
 
-def get_synsets(np):
+def get_synset(np):
   tokens = nltk.word_tokenize(np)
-  synsets = wn.synsets('_'.join(tokens))
-  while np and not synsets:
+  synsets = wn.synsets('_'.join(tokens), 'n')
+  while tokens and not synsets:
     # remove modifiers from noun head
     tagged_np = nltk.pos_tag(tokens)
     if not tagged_np[0][1].startswith('NN'):
       tokens = tokens[1:]
     else:
       break
-    synsets = wn.synsets('_'.join(tokens))
+    synsets = wn.synsets('_'.join(tokens), 'n')
 
+  if synsets:
+    return synsets[0]
+
+def get_definition_synsets(definition):
+  tokens = nltk.word_tokenize(definition)
+  tagged_tokens = nltk.pos_tag(tokens)
+  synsets = []
+  for token, tag in tagged_tokens:
+    if tag.startswith('NN'):
+      synset = get_synset(token)
+      if synset and synset.min_depth > 3:
+        synsets.append(synset)
   return synsets
 
-def syn(np1, np2):
+def get_synsets(np1, np2):
   max_lch = 0
   max_syns = ()
-  syn1 = get_synsets(np1)[0]
-  syn2 = get_synsets(np2)[0]
-  try:
-    if syn1 != syn2:
-      lch = syn1.lch_similarity(syn2)
-      if lch > max_lch:
-        max_syns = (syn1, syn2)
-        max_lch = lch
-  except:
-    pass
-  if max_lch > 1.6:
-    return max_syns
+  syn1 = get_synset(np1)
+  if syn1:
+    synsets1 = [syn1] + get_definition_synsets(syn1.definition)
+  syn2 = get_synset(np2)
+  if syn2:
+    synsets2 = [syn2] + get_definition_synsets(syn2.definition)
+
+  if not syn1 or not syn2:
+    return
+  return (synsets1, synsets2)
+
+def determine_if_related(np1, np2):
+  syn1 = get_synset(np1)
+  syn2 = get_synset(np2)
+
+  if syn1 and syn2 and syn1.max_depth() > 5 and syn2.max_depth() > 5:
+    lch = syn1.lowest_common_hypernyms(syn2)[0]
+    if lch not in [syn1, syn2] and synset_distance(syn1, lch) + synset_distance(syn2, lch) < 5:
+      return (syn1, syn2)
+
+def synset_distance(hypo, hyper):
+  if hypo == hyper:
+    return 0
+  hypernyms = hypo.hypernyms()
+  if not hypernyms:
+    return float("inf")
+  return 1 + min([synset_distance(new_hypo, hyper) for new_hypo in hypernyms])
 
 def get_NP_syns(article1_NPs, article2_NPs):
   syns = []
   for np1 in article1_NPs:
     for np2 in article2_NPs:
-      if np1 in LOADED_WORDS and np2 in LOADED_WORDS:
-        syn_match = syn(np1, np2)
+      if ((np1 in LOADED_WORDS) ^ (np2 in LOADED_WORDS)):
+        syn_match = determine_if_related(np1, np2)
         if syn_match:
-          syns.append(syn_match)
+          syns.append((np1, np2))
 
   return syns
 
@@ -119,4 +146,5 @@ if __name__ == '__main__':
     with open('article2.json') as article2:
       article2 = json.load(article2)
       article2_NPs = set(get_NPs(article2["title"]) + get_NPs(article2["article_text"]))
+      article2_NPs = article2_NPs.difference(article1_NPs)
       print get_NP_syns(article1_NPs, article2_NPs)
