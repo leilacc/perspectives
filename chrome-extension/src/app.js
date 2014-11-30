@@ -52,7 +52,7 @@ var Main = React.createClass({
       var self = this;
       setTimeout(function(){
         self.setState({loading: false,
-                       data: datata});},6000);
+                       data: datata});},3000);
   },
   componentWillMount: function() {
     var pageTitle = document.body.querySelector('h1')
