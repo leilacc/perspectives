@@ -1,0 +1,16 @@
+To run this code, enter "sh script" in command line
+All output appears in output_json_files in json format
+The files in the hard_coded_input directory have been hardcoded because of scraping limitations. As soon as I figure out a way to automate the scraping I will plug it into the pipeline
+
+Date standard is:month/day/year ex_ 10/06/2014
+
+
+aljazeera1: 06 Nov 2014 14:09
+aljazeera2 "06 Nov 2014 20:
+jpost 11/06/2014 10:,
+zamandaily November 30, 2014, Sunday
+nytimes "2014-11-05T16:21:48Z",
+1329
+
+
+11-06-2014
