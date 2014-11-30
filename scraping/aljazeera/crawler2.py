@@ -173,7 +173,8 @@ def aljazeera2(url):
     c = soup.findAll("p")
     for paragraph in c:
         try:
-            output +=  paragraph.text.decode("utf-8").replace("\"","'").replace("\n","") + " "
+            if "Rules&nbsp;&amp; Guidelines" not in paragraph.text and "Terms and" not in paragraph.text and "AGELOADEDSUCCESSFULLY" not in paragraph.text:
+                output +=  paragraph.text.decode("utf-8").replace("\"","'").replace("\n","") + " "
         except UnicodeEncodeError:
             pass
     output += "\"}\n"
@@ -275,11 +276,12 @@ def zamandaily(url):
     c = soup.findAll("p")
     for paragraph in c:
         try:
-            output +=  paragraph.text.decode("utf-8").replace("\"","'").replace("^M","").replace("\n","").replace("\\","").replace(r'\r','').replace("\r", "").replace("\n", "") + " " 
+            output +=  paragraph.text.decode("utf-8").replace("\"","'").replace("^M","").replace("\n","").replace("\\","").replace(r'\r','').replace("\r", "").replace("\n", "")  + " " 
         except UnicodeEncodeError:
             pass
 
     output += "\"}\n"
+#    output = output.replace("\"","")
     return ''.join([i if ord(i) < 128 else ' ' for i in output])
 #    return output
 
@@ -333,13 +335,30 @@ zaman_output = main("hard_coded_input/zamandaily.html")
 
 def combine_output(zaman_output,other_output,jpost_output):
     a =  "{\"results\": {\"news_sources\": ["
-    a += jpost_output + other_output + "," + zaman_output
+    a += jpost_output + "," + other_output + "," + zaman_output
     a +=  "]}}"
     return a
 
+out = open('combined.json','w+')
+    
 j = combine_output(zaman_output,other_output,jpost_output)
+j = j.replace("\\","").replace("\n","").replace("\\","").replace(r'\r','').replace("\r", "").replace("'","").replace("\'","").replace("\"","")
+
+j = j.encode('UTF-8','strict')
+out = open('combined.json','w+')
+out.write(j)
+#o = ''.join([i if ord(i) < 128 else ' ' for i in j])
+#o = o.replace('\r\n', '').replace('\r', ' ').replace('\n', ' ')
+#print o
+with open('crap.json') as f:
+    a = f.readlines()
+str = ""
+for line in a:
+    str += line + " "
+
+la = json.loads(str)
 
 
-results = analysis.differential(j)
+results = analysis.differential(la)
 print results
 
