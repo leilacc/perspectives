@@ -254,7 +254,7 @@ def compare_articles(article1, article2):
 
 if __name__ == '__main__':
   with open('test_articles/full_test.json') as article1:
-    differential(json.load(article1))
+    print differential(json.load(article1))
   '''
   with open('test_articles/article1.json') as article1:
     article1 = json.load(article1)
