@@ -27,7 +27,7 @@ def leaves_to_str(NPleaves):
   # converts leaves to strings
   leaf_strs = []
   for leaf in NPleaves:
-    leaf_strs.append(lemmatize(leaf[0], 'n'))
+    leaf_strs.append(leaf[0])
   return ' '.join(leaf_strs)
 
 def form_wn_phrase(NPleaves):
@@ -39,24 +39,49 @@ def form_wn_phrase(NPleaves):
   return '_'.join(phrase)
 
 def check_wn_phrase(NPleaves):
+  for leaf in NPleaves:
+    leaf = (lemmatize(leaf[0], 'n'), leaf[1])
+
   # check if the words in NPleaves form a common phrase according to WN
   while NPleaves[0][1] == 'DT':
     # remove determiners
     NPleaves = NPleaves[1:]
 
-  while ((NPleaves[0][1].startswith('CD') or
-          NPleaves[0][1].startswith('RB') or
-          NPleaves[0][1].startswith('JJ')) and
+  while ((not NPleaves[0][1].startswith('NN')) and
          not wn.synsets(form_wn_phrase(NPleaves) ,'n')):
     # remove leading numbers,adverbs, and adjectives that do not form a
     # commonly-used phrase according to WN
     NPleaves = NPleaves[1:]
+  while ((not NPleaves[-1][1].startswith('NN')) and
+         not wn.synsets(form_wn_phrase(NPleaves) ,'n')):
+    # remove leading numbers,adverbs, and adjectives that do not form a
+    # commonly-used phrase according to WN
+    NPleaves = NPleaves[0:-1]
   return NPleaves
 
-def get_NPs(sentence):
-  tokens = nltk.word_tokenize(sentence)
-  tagged_tokens = nltk.pos_tag(tokens)
-  NPs = chunk(tagged_tokens)
+def get_VPs(string):
+  VPs = {}
+  for sentence in string.split('.'):
+    tokens = nltk.word_tokenize(sentence)
+    tagged_tokens = nltk.pos_tag(tokens)
+    for word, tag in tagged_tokens:
+      word = lemmatize(word, 'v')
+      if tag.startswith('V') and word in VPs.iterkeys():
+        VPs[word].append(sentence)
+      else:
+        VPs[word] = [sentence]
+  return VPs
+
+def get_NPs(string):
+  NPs = {}
+  for sentence in string.split('.'):
+    tokens = nltk.word_tokenize(sentence)
+    tagged_tokens = nltk.pos_tag(tokens)
+    for np in chunk(tagged_tokens):
+      if np in NPs.iterkeys():
+        NPs[np].append(sentence)
+      else:
+        NPs[np] = [sentence]
   return NPs
 
 def chunk(pos_tagged_tokens):
@@ -115,11 +140,11 @@ def determine_if_related(np1, np2):
 
   if syn1 and syn2 and syn1.max_depth() > 5 and syn2.max_depth() > 5:
     lch = syn1.lowest_common_hypernyms(syn2)[0]
-    if lch not in [syn1, syn2] and synset_distance(syn1, lch) + synset_distance(syn2, lch) < 5:
+    if lch not in [syn1, syn2] and synset_distance(syn1, [lch]) + synset_distance(syn2, [lch]) < 5:
       return (syn1, syn2)
 
 def synset_distance(hypo, hyper):
-  if hypo == hyper:
+  if hypo in hyper:
     return 0
   hypernyms = hypo.hypernyms()
   if not hypernyms:
@@ -137,14 +162,94 @@ def get_NP_syns(article1_NPs, article2_NPs):
 
   return syns
 
+def get_ancestors(synset):
+  ancestors = synset.hypernyms()
+  for hypernym in synset.hypernyms():
+    ancestors.extend(get_ancestors(hypernym))
+  return ancestors
+
+def get_sentence(np, string):
+  matching_sentences = []
+  for sentence in string.split('.'):
+    tokens = nltk.word_tokenize(sentence)
+    tagged_tokens = nltk.pos_tag(tokens)
+    tree = NpChunker.parse(tagged_tokens)
+    for child in tree:
+      if type(child) == nltk.Tree and child.node == 'NP':
+        leaves = child.leaves()
+        if np in ' '.join([lemmatize(leaf[0], 'n') for leaf in leaves]):
+          matching_sentences.append(sentence)
+  return matching_sentences
+
+def get_tree(sentence):
+    tokens = nltk.word_tokenize(sentence)
+    tagged_tokens = nltk.pos_tag(tokens)
+    return NpChunker.parse(tagged_tokens)
+
 
 if __name__ == '__main__':
   with open('article1.json') as article1:
     article1 = json.load(article1)
-    article1_NPs = set(get_NPs(article1["title"]) + get_NPs(article1["article_text"]))
+    text_NPs = get_NPs(article1["article_text"])
+    article1_NPs = set(text_NPs.keys())
+    text_VPs = get_VPs(article1["article_text"])
+    article1_VPs = set(text_VPs.keys())
 
     with open('article2.json') as article2:
       article2 = json.load(article2)
-      article2_NPs = set(get_NPs(article2["title"]) + get_NPs(article2["article_text"]))
-      article2_NPs = article2_NPs.difference(article1_NPs)
+      text_NPs = get_NPs(article2["article_text"])
+      article2_NPs = set(text_NPs.keys())
+      diff_NPs = article2_NPs.difference(article1_NPs)
       print get_NP_syns(article1_NPs, article2_NPs)
+      print '--------\n'
+      text_VPs = get_VPs(article2["article_text"])
+      article2_VPs = set(text_VPs.keys())
+      diff_VPs = article2_VPs.difference(article1_VPs)
+
+      syns1 = []
+      for np in article1_NPs:
+        synset = get_synset(np)
+        if synset:
+          syns1.append(synset)
+          syns1.extend(get_ancestors(synset))
+
+      sentences = {}
+      for np in diff_NPs:
+        np = np.encode('utf-8')
+        synset = get_synset(np)
+        if synset:
+          distance = synset_distance(synset, syns1)
+          if distance > 3:
+            print np
+            sentence = text_NPs[np][0].strip() + '.'
+            if sentence in sentences:
+              sentences[sentence] = sentences[sentence].replace(np, '**%s**' % np)
+            else:
+              sentences[sentence] = sentence.replace(np, '**%s**' % np)
+
+      syns1 = []
+      for vp in article1_VPs:
+        syn = wn.synsets(vp, 'v')
+        if syn:
+          syn = syn[0]
+          syns1.append(syn)
+          syns1.extend(get_ancestors(syn))
+
+      for verb in diff_VPs:
+        verb = verb.encode('utf-8')
+        syn = wn.synsets(verb, 'v')
+        if syn:
+          syn = syn[0]
+          distance = synset_distance(syn, syns1)
+          if distance > 5 and distance != float("inf"):
+            print verb
+            sentence = text_VPs[verb][0].encode('utf-8').strip() + '.'
+            print get_tree(sentence)
+            if sentence in sentences:
+              sentences[sentence] = sentences[sentence].replace(verb, '**%s**' % verb)
+            else:
+              sentences[sentence] = sentence.replace(verb, '**%s**' % verb)
+
+      for sentence in sentences.itervalues():
+        print sentence
+
