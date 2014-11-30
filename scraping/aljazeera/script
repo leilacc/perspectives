@@ -1,3 +1,4 @@
-python crawler.py "http://www.jpost.com/Israel-News/ICC-rejects-pro-Turkey-war-crimes-allegations-against-IDF-in-Gaza-flotilla-raid-380955" > output_json_files/output.json
+python crawler.py "http://www.jpost.com/Israel-News/ICC-rejects-pro-Turkey-war-crimes-allegations-against-IDF-in-Gaza-flotilla-raid-380955"
 python get_query.py > title.out #gets keyword from title
-python crawler.py title.out #gets title from url - pipes it into aljazeera and nytimes
+python crawler.py title.out #gets title from url,pipes it into aljazeera and nytimes
+python crawler.py "hard_coded_input/zamandaily.html" #looks at todays zaman

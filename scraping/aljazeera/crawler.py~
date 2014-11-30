@@ -183,7 +183,7 @@ def nytimes(url):
     headline = data["response"]["docs"][0]["headline"]["main"]
     date = data["response"]["docs"][0]["pub_date"]
     arr = date.split("-") #2014-11-05T16:21:48Z"
-    day = arr[2][:2]
+    day = arr[2][2:]
     month = arr[1]
     year = arr[0][2:]
 

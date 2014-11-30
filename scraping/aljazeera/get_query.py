@@ -1,7 +1,7 @@
 import nltk
 import json
 
-with open('output_json_files/output.json') as data_file: 
+with open('output_json_files/jpost_output.json') as data_file: 
     data = json.load(data_file)
 
 query = data["title"]
