@@ -4,7 +4,13 @@ body {
     overflow: hidden;
 }
 
+@-webkit-keyframes fadein {
+    from {opacity: 0}
+    to   {opacity: 1}
+}
+
 #react-hook {
+    overflow-y: scroll;
     padding: 0;
     margin: 0;
     height: 100vh;
@@ -12,9 +18,10 @@ body {
     background-color: rgba(0,0,0,0.5);
     display: block;
     position: fixed;
+    opacity: 0;
     top: 0;
-    z-index: 100000;
-    animation: fadein 1s linear 0s infinite both;
+    z-index: 1000000000;
+    -webkit-animation: fadein 1s ease-out 0s 1 both;
 }
 
 #react-hook section {
@@ -22,11 +29,12 @@ body {
     margin: 0;
     padding: 1em;
     display: block;
-    height: 16vh;
+    height: auto;
     width: 100vw;
     background-color: white;
+    transform: translateX(-100vw);
     cursor: pointer;
-    transition: all 0.5s ease-out;
+    transition: all 0.2s ease-out;
     border-bottom: 1px solid #E7E7E7;
 }
 
@@ -41,18 +49,41 @@ body {
 }
 
 h1:not(.react) {
-    position: relative;
-    color: white;
-    z-index: 100000000;
+    position: relative !important;
+    color: white !important;
+    z-index: 100000000000 !important;
+    pointer-events: none;
 }
 
-#react-hook .black {
+#react-hook .react-black {
     display: block;
     height: 20vh;
     background-color: transparent;
+    cursor: pointer;
 }
 
-@keyframes fadein {
-    from {opacity: 0}
-    to   {opacity: 1}
+/* exception for new york times demo */
+#masthead, nav {
+    opacity: 0 !important;
+    transition: opacity 0.3s;
+}
+
+#Shape {
+    transform-origin: 50% 50%;
+}
+@-webkit-keyframes scalein {
+    from {opacity: 0;
+          transform: scale(10,10);}
+    to   {opacity: 1;
+          transform: scale(1,1);}
+}
+
+.react-icon-loader{
+    transform-origin: 50%,50%;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    margin-top: -64px;
+    margin-left: -64px;
+    -webkit-animation: scalein 0.4s ease-out 0s 1 both;
 }
