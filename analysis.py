@@ -11,8 +11,7 @@ DefaultNpPattern = ''.join([r'(<DT|AT>?<RB>?)?',
 			    r'(<N.*>)+'])
 BaselineNpChunkRule = ChunkRule(DefaultNpPattern,
                                 'Default rule for NP chunking')
-NpChunker = RegexpChunkParser([BaselineNpChunkRule],
-                              chunk_node='NP',top_node='S')
+NpChunker = RegexpChunkParser([BaselineNpChunkRule])
 
 with open('loaded_words.txt', 'r') as f:
   LOADED_WORDS = [line.strip('\n').lower()
@@ -187,6 +186,7 @@ def get_tree(sentence):
     return NpChunker.parse(tagged_tokens)
 
 def differential(articles):
+  articles = articles["results"]["news_sources"]
   main_article = articles[0]
   all_results = []
   for comparison_article in articles[1:]:
@@ -250,4 +250,17 @@ def compare_articles(article1, article2):
           else:
             sentences[sentence] = sentence.replace(verb, '**%s**' % verb)
 
-    return sentences.itervalues()
+    return sentences.values()
+
+if __name__ == '__main__':
+  with open('test_articles/full_test.json') as article1:
+    differential(json.load(article1))
+  '''
+  with open('test_articles/article1.json') as article1:
+    article1 = json.load(article1)
+
+    with open('test_articles/article2.json') as article2:
+      article2 = json.load(article2)
+
+      print [val for val in compare_articles(article1, article2)]
+      '''
