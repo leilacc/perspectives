@@ -1,0 +1,27 @@
+{
+  "name": "Perspectives",
+  "version": "0.0.1",
+  "manifest_version": 2,
+  "description": "Behold, pure awesomeness",
+  "homepage_url": "https://github.com/leilacc/perspectives",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "default_locale": "en",
+  "background": {
+    "scripts": [
+      "background.js"
+    ],
+    "persistent": true
+  },
+  "browser_action": {
+    "default_icon": "icons/icon128.png",
+    "default_title": "Read more on this topic via Perspectives"
+  },
+  "permissions": [
+      "activeTab", "contextMenus", "http://*/*", "https://*/*"
+  ],
+  "options_page": "options.html"
+}

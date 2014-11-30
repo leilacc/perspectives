@@ -1,0 +1,21 @@
+{
+  "name": "perspectives-extension",
+  "version": "0.0.1",
+  "homepage": "https://github.com/leilacc/perspectives",
+  "authors": [
+    "Jelle Akkerman <jelle@jelleakkerman.nl>"
+  ],
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "react": "~0.12.1",
+    "velocity": "~1.1.0"
+  }
+}
