@@ -40,7 +40,7 @@ We do a semantic differential analysis between the original article and these
 alternate articles using natural language processing tools like NLTK and Wordnet.
 We identify and display the largest semantic differences in the alternate articles.
 
-Planned next steps include integrating more APIs, and supplementing official news articles
+Planned next steps include integrating more news APIs, and supplementing these official news articles
 with high quality social media news/opinions (ie Twitter).
 
 #### Fin
