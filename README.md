@@ -16,11 +16,12 @@ see [ICC rejects pro-Turkey war crimes allegations against IDF in Gaza flotilla 
 
 With Perspectives, our goal is to promote the awareness of multiple perspectives
 on newsworthy content.
-We want to equip everyday media consumers like you with as many versions of the 'truth' as possible,
-enabling them to 
+We want to equip everyday media consumers - people like you and me and my mom - with as many versions of the 'truth' as possible,
+enabling them to come to their own conclusions about different news events.
 
-Perspectives is a Chrome extension that allows news readers to seamlessly discover alternative accounts of any article they read online.
-Through the extension, the reader is shown alternative articles which have different words, phrases, and information than the one you were reading before.
+Perspectives is a Chrome extension that allows news readers to seamlessly discover alternative accounts of any article they read online
+(although currently limited to 4 news organizations, we plan to expand to include as many organizations as possible).
+Through the extension, the reader is shown facts which have different words, phrases, and information than the one you were reading before.
 
 The beauty of this application is that it allows the possibility to see
 what an initial article may have missed. Users can immerse themselves in other
