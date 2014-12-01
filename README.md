@@ -32,14 +32,16 @@ points of view, and, in the process, become better armed to identify media bias 
 
 #### Technical details
 
-In this
-application, we extract key words and noun phrases from an article a user is 
-reading. We use those key words to query several web APIs and scrape other news
-sources that may provide alternative views. We do semantic differential analysis 
-using natural language processing tools like NLTK and Wordnet to measure these
-differences and we deliver you the best results to expand your views. The next
-steps for our project involved integrating more APIs, supplementing news articles
-with social media news. 
+When a reader opens a news article webpage, Perspectives determines the article's
+main topics by extracting key words from the headline.
+These key words are used to find similar articles posted by other news organizations
+by querying their web APIs, if available, or by scraping other news sites.
+We do a semantic differential analysis between the original article and these
+alternate articles using natural language processing tools like NLTK and Wordnet.
+We identify and display the largest semantic differences in the alternate articles.
+
+Planned next steps include integrating more APIs, and supplementing official news articles
+with high quality social media news/opinions (ie Twitter).
 
 #### Fin
 
