@@ -50,3 +50,5 @@ with high quality social media news/opinions (ie Twitter).
 #### Fin
 
 In the U.S. the Pew Research Center found that believability ratings for news outlets is at its lowest in at least 30 years. Our project raises the credibility of _all_ news sources, by offering more transparent interactions with them. We hope that a tool like this can legitimize and humanize people who have different backgrounds and viewpoints than ourselves.
+
+Created by: Jelle Akkerman, Zahra Parnia Ashktorab, Jackie Hurwitz, and Leila Chan Currie
