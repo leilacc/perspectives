@@ -1,5 +1,7 @@
 import sys
 
+NUM_ARTICLES = 3
+
 def _functionId(obj, nFramesUp):
     """ Create a string naming the function n frames up on the stack. """
     fr = sys._getframe(nFramesUp+1)
@@ -14,9 +16,25 @@ class NewsOrg:
   '''Represents a news organization.'''
 
   def get_article(self, url):
-    '''Return the contents of the article at url.'''
+    '''Return an Article representing the article at url.'''
     abstractMethod(self)
 
   def get_query_results(self, query):
-    '''Return the results of the query in the news org's search system.'''
+    '''Return a list of NUM_ARTICLES Articles returned by query.'''
     abstractMethod(self)
+
+class Article:
+  '''Represents an article.'''
+
+  def __init__(self, headline, body, link, news_org):
+    '''Initialize the article's properties.
+
+    headline: str
+    body: str
+    link: str
+    news_org: int. See the macros in api_keys
+    '''
+    self.headline = headline
+    self.body = body
+    self.link = link
+    self.news_org = news_org
