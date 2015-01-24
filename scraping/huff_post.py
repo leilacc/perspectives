@@ -1,0 +1,50 @@
+from bs4 import BeautifulSoup
+import json
+import logging
+import requests
+
+from logger import log
+import news_interface
+import news_orgs
+import api_keys
+
+logging.basicConfig(filename='huff_post.log', level=logging.WARNING)
+
+class HuffPost(news_interface.NewsOrg):
+  '''Methods for interacting with the Huffington Post website/API.'''
+
+  def get_article(self, url):
+    '''Implementation for getting an article from Huffington Post.
+
+    url: A URL in the www.huffingtonpost.* domain.
+
+    Returns: The Article representing the article at that url.
+    '''
+    soup = BeautifulSoup(requests.get(url).text)
+    headline = soup.h1.string
+    article = soup.find('article', attrs={'class': 'entry'})
+    paragraphs = article.find_all('p', attrs={'class': None})
+    body = ' '.join([p.get_text() for p in paragraphs])
+    log.info(body)
+    return news_interface.Article(headline, body, url, news_orgs.HUFF_POST)
+
+  def get_query_results(self, query):
+    '''Implementation for keyword searches from Huffington Post.
+
+    query: A URL-encoded string.
+
+    Returns: A list of the top Articles returned by the query search.
+    '''
+    res = requests.get(
+        'https://www.googleapis.com/customsearch/v1element?key=%s&rsz=10&num=10&hl=en&prettyPrint=false&source=gcsc&gss=.com&sig=23952f7483f1bca4119a89c020d13def&cx=004830092955692134028:an6per91wyc&q=%s&as_sitesearch=huffingtonpost.com&googlehost=www.google.com&callback=google.search.Search.apiary17234&nocache=1422138917068'
+        % (api_keys.api_keys[news_orgs.HUFF_POST], query))
+    results = json.loads(res.text[49:-2])['results']
+    article_urls = [res['url'] for res in results]
+
+    top_articles = []
+    for url in article_urls:
+      if url.endswith('.html'):
+        # Huff Post sometimes returns aggregator pages that don't
+        # contain an article and don't end in .html
+        top_articles.append(self.get_article(url))
+    return top_articles[0:news_interface.NUM_ARTICLES]
