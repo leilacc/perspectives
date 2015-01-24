@@ -46,9 +46,6 @@ class USAToday(news_interface.NewsOrg):
 
     top_articles = []
     for article in all_articles[0:news_interface.NUM_ARTICLES]:
-      headline = article['title']
       link = article['link']
-      body = self.get_article(link)
-      top_articles.append(
-          news_interface.Article(headline, body, link, news_orgs.USA_TODAY))
+      top_articles.append(self.get_article(link))
     return top_articles
