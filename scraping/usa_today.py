@@ -1,6 +1,8 @@
+import requests
 import xmltodict
 
 import news_interface
+import news_orgs
 import api_keys
 
 
@@ -15,7 +17,8 @@ class USAToday(news_interface.NewsOrg):
     '''Implementation for getting an article from USA Today.'''
     res = requests.post(
         "http://api.usatoday.com/open/articles?keyword=%s&api_key=%s"
-        % (query, api_keys.api_keys[USA_TODAY]))
+        % (query, api_keys.api_keys[news_orgs.USA_TODAY]))
+    print res.text
     xml_dict = xmltodict.parse(res.text)
     all_articles = xml_dict['rss']['channel']['item']
     top_articles = []
