@@ -3,13 +3,13 @@ import sys
 NUM_ARTICLES = 3
 
 def _functionId(obj, nFramesUp):
-    """ Create a string naming the function n frames up on the stack. """
+    '''Create a string naming the function n frames up on the stack.'''
     fr = sys._getframe(nFramesUp+1)
     co = fr.f_code
     return "%s.%s" % (obj.__class__, co.co_name)
 
 def abstractMethod(obj=None):
-    """ Use this instead of 'pass' for the body of abstract methods. """
+    '''Use this instead of 'pass' for the body of abstract methods.'''
     raise Exception("Unimplemented abstract method: %s" % _functionId(obj, 1))
 
 class NewsOrg:
@@ -20,7 +20,10 @@ class NewsOrg:
     abstractMethod(self)
 
   def get_query_results(self, query):
-    '''Return a list of NUM_ARTICLES Articles returned by query.'''
+    '''Return a list of NUM_ARTICLES Articles returned by query.
+
+    query: A URL-encoded string.
+    '''
     abstractMethod(self)
 
 class Article:
