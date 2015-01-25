@@ -4,3 +4,4 @@ HUFF_POST = 1
 BBC = 2
 NY_POST = 3
 CBC = 4
+GUARDIAN = 5
