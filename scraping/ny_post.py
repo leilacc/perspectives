@@ -1,0 +1,54 @@
+from bs4 import BeautifulSoup
+import json
+import logging
+import requests
+
+from logger import log
+import news_interface
+import news_orgs
+import api_keys
+
+logging.basicConfig(filename='ny_post.log', level=logging.WARNING)
+
+
+class NYPost(news_interface.NewsOrg):
+  '''Methods for interacting with the New York Post website.
+
+  Example usage:
+  >>> import new_york_post
+  >>> nyp = new_york_post.NewYorkPost()
+  >>> nyp.get_article('http://nypost.com/2015/01/25/paris-terrorists-fit-profile-of-homegrown-threat-described-in-2007-nypd-report/')
+  '''
+
+  def get_article(self, url):
+    '''Implementation for getting an article from the New York Post.
+
+    url: A URL in the nypost.com domain.
+
+    Returns: The Article representing the article at that url.
+    '''
+    soup = BeautifulSoup(requests.get(url).text)
+    headline = soup.h1.a.string
+    article = soup.find('div', attrs={'class': 'entry-content'})
+    paragraphs = article.find_all('p', attrs={'class': None})
+    body = ' '.join([p.get_text() for p in paragraphs])
+    log.info(headline)
+    log.info(body)
+    return news_interface.Article(headline, body, url, news_orgs.NY_POST)
+
+  def get_query_results(self, query):
+    '''Implementation for getting an article from the New York Post.
+
+    query: A URL-encoded string.
+
+    Returns: A list of the top Articles returned by the query search.
+    '''
+    res = requests.get('http://nypost.com/?s=%s' % (query))
+    soup = BeautifulSoup(res.text)
+    articles = soup.find_all('article')
+    article_urls = [article.h3.a.get('href') for article in articles]
+
+    top_articles = []
+    for url in article_urls[0:news_interface.NUM_ARTICLES]:
+        top_articles.append(self.get_article(url))
+    return top_articles
