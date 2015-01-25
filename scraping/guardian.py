@@ -12,7 +12,7 @@ logging.basicConfig(filename='guardian.log', level=logging.WARNING)
 
 
 class Guardian(news_interface.NewsOrg):
-  '''Methods for interacting with the Guardian website.'''
+  '''Methods for interacting with the Guardian website/API.'''
 
   def get_article(self, url):
     '''Implementation for getting an article from the Guardian.
