@@ -6,3 +6,4 @@ NY_POST = 3
 CBC = 4
 GUARDIAN = 5
 RUSSIA_TODAY = 6
+GLOBE_AND_MAIL = 7 #globe and mail
