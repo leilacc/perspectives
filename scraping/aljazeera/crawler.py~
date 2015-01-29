@@ -105,6 +105,7 @@ def aljazeera(url):
     a = ""
     for line in content:
         a += line + " "
+
     soup = BeautifulSoup(a)
     c = soup.findAll("a", {"ctype": "c"})
     arr = []
@@ -122,6 +123,7 @@ def aljazeera2(url):
     html = response.read()
     soup = BeautifulSoup(html)
     output = ""
+
     a = soup.find("title")
     title = a.text
     output = "{\"source\": \"" + "Al Jazeera" + "\",\n"
@@ -161,8 +163,12 @@ def aljazeera2(url):
     elif month == "Dec":
         m = 12
     date = str(m) + "/" + d + "/" + y
+
     output +=  "\"date\": \""+ date + "\",\n"
+
+
     output +=  "\"article_text\": \""
+
 
     c = soup.findAll("p")
     for paragraph in c:
