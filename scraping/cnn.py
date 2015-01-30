@@ -51,7 +51,7 @@ class CNN(news_interface.NewsOrg):
                                                                                                                                                                                                                                                                                                                             
     Returns: A list of the top Articles returned by the query search.                                                                                                                                                                                                                                                       
     '''
-    res = requests.get("http://searchapp.cnn.com/search/query.jsp?page=1&npp=10&start=1&text=blizzard&type=all&bucket=true&sort=relevance&csiID=csi1")
+    res = requests.get("http://searchapp.cnn.com/search/query.jsp?page=1&npp=10&start=1&text=%s&type=all&bucket=true&sort=relevance&csiID=csi1" % (query))
     output = res.text.encode('ascii', 'ignore').split("\"url\":")
 
     article_urls = []
