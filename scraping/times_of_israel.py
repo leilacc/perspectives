@@ -24,7 +24,7 @@ from selenium import webdriver
 logging.basicConfig(filename='times_of_israel.log', level=logging.WARNING)
 
 class TIMES_OF_ISRAEL(news_interface.NewsOrg):
-  '''Methods for interacting with the BBC website.'''
+  '''Methods for interacting with the Times of Israel website.'''
 
   def get_article(self, url):
     '''Implementation for getting an article from Times of Israel.                                                                                                                                                                                                                                                                      
@@ -54,20 +54,19 @@ class TIMES_OF_ISRAEL(news_interface.NewsOrg):
                                                                                                                                                                                                                                                                                                                             
     Returns: A list of the top Articles returned by the query search.                                                                                                                                                                                                                                                       
     '''
-    browser = webdriver.Firefox()
-    browser.get("http://www.timesofisrael.com/search/?q=%s&submit=Go" %  (query))
-    html_source = browser.page_source
-    soup = BeautifulSoup(html_source)
-    articles = soup.findAll('div', attrs={'class': 'gsc-webResult gsc-result'})
+    res = requests.get("https://www.googleapis.com/customsearch/v1element?key=AIzaSyCVAXiUzRYsML1Pv6RwSG1gunmMikTzQqY&rsz=filtered_cse&num=10&hl=en&prettyPrint=false&source=gcsc&gss=.com&sig=23952f7483f1bca4119a89c020d13def&cx=015742192883069867459:k3m1yn-i4ua&q=%s&googlehost=www.google.com&callback=google.search.Search.apiary782&nocache=1422549552720" % (query))
 
-    article_urls = [article.a.get('href') for article in articles]
+    output = res.text.encode('ascii', 'ignore').split("\"ogUrl\":")
+    article_urls = []
+    for line in output:
+      try:
+        a = line.split(",")[0].replace('"',"")
+        if "http" in a:
+          article_urls.append(a)
+      except:
+        pass
+
+    print article_urls
     top_articles = []
     for url in article_urls[0:news_interface.NUM_ARTICLES]:
       top_articles.append(self.get_article(url))
-
-    return top_articles
-
-
-
-
-
