@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup
 import json
 import logging
+
 import requests
 
 
@@ -16,7 +17,7 @@ import copy
 import re
 import argparse
 import sys
-from selenium import webdriver
+
 
 
 
@@ -58,18 +59,20 @@ class ALJAZEERA(news_interface.NewsOrg):
                                                                                                                                                                                                                                                                                                                             
     Returns: A list of the top Articles returned by the query search.                                                                                                                                                                                                                                                       
     '''
-   
-   browser = webdriver.Firefox()
-   browser.get("http://america.aljazeera.com/search.html?q=" + query)
-   html_source = browser.page_source
-   soup = BeautifulSoup(html_source)
-   articles = soup.findAll('div', attrs={'class': 'gs-webResult gs-result'})
+   res = requests.get("https://www.googleapis.com/customsearch/v1element?key=AIzaSyCVAXiUzRYsML1Pv6RwSG1gunmMikTzQqY&rsz=filtered_cse&num=10&hl=en&prettyPrint=false&source=gcsc&gss=.com&sig=23952f7483f1bca4119a89c020d13def&cx=007864276874919660377:szp4pg3raxu&q=%s&lr=lang_en&filter=1&sort=&googlehost=www.google.com&callback=google.search.Search.apiary7638&nocache=1422548009762" % (query))
 
-   article_urls = [article.a.get('href') for article in articles]
+   output = res.text.encode('ascii', 'ignore').split("\"ogUrl\":")
+   article_urls = []
+   for line in output:
+     article= re.search('http:.*.aljazeera.*.html","ogType":"article"',line)
+     try:
+       a = article.group(0).strip('","ogType":"article"')
+       article_urls.append(a+"l")
+     except:
+       pass
+   print article_urls
    top_articles = []
    for url in article_urls[0:news_interface.NUM_ARTICLES]:
      top_articles.append(self.get_article(url))
-
-   return top_articles
 
 

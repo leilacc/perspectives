@@ -1,4 +1,5 @@
-from bs4 import BeautifulSoup
+#from bs4 import BeautifulSoup
+#import simplejson as json
 import json
 import logging
 import requests
@@ -16,7 +17,7 @@ import copy
 import re
 import argparse
 import sys
-from selenium import webdriver
+
 
 
 
@@ -56,20 +57,13 @@ class JPOST(news_interface.NewsOrg):
     Returns: A list of the top Articles returned by the query search.                                                                                                           
                                                                                                                                             
     '''
-
-   browser = webdriver.Firefox()
-   browser.get("http://www.jpost.com/Search?search" + query)
-   html_source = browser.page_source
-   soup = BeautifulSoup(html_source)
-   articles = soup.findAll('li', attrs={'class': "search-item"})
-
-   article_urls = [article.a.get('href') for article in articles]
-   top_articles = []
-   for url in article_urls[0:news_interface.NUM_ARTICLES]:
-     top_articles.append(self.get_article(url))
-
-   return top_articles
-
-
-
-
+    res = requests.get("https://www.googleapis.com/customsearch/v1?key=AIzaSyCMGfdDaSfjqv5zYoS0mTJnOT3e9MURWkU&cx=012860551684240964068:7b9pexdovug&q=%s&start=1&callback=getCSEResults" % (query))
+    output = res.text.encode('ascii', 'ignore').split("\n")
+    article_urls = []
+    for line in output:
+      if "link" in line and "googleapis" not in line:
+        url = line.replace("\"link\": \"","").replace("\"","").strip(",").strip()
+        article_urls.append(url)
+    top_articles = []
+    for url in article_urls[0:news_interface.NUM_ARTICLES]:
+      top_articles.append(self.get_article(url))

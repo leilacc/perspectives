@@ -8,7 +8,7 @@ import news_interface
 import news_orgs
 from BeautifulSoup import BeautifulSoup
 import urllib2
-from selenium import webdriver
+
 
 
 logging.basicConfig(filename='cnn.log', level=logging.WARNING)
@@ -51,15 +51,21 @@ class CNN(news_interface.NewsOrg):
                                                                                                                                                                                                                                                                                                                             
     Returns: A list of the top Articles returned by the query search.                                                                                                                                                                                                                                                       
     '''
-    browser = webdriver.Firefox()
-    browser.get("http://www.cnn.com/search/?text=" + query)
-    html_source = browser.page_source
-    soup = BeautifulSoup(html_source)
-    articles = soup.findAll('article', attrs={'class': 'cd cd--card cd--idx-0 cd--large cd--horizontal cd--has-media cd--video'})
-    article_urls = [article.a.get('href') for article in articles]
+    res = requests.get("http://searchapp.cnn.com/search/query.jsp?page=1&npp=10&start=1&text=%s&type=all&bucket=true&sort=relevance&csiID=csi1" % (query))
+    output = res.text.encode('ascii', 'ignore').split("\"url\":")
+
+    article_urls = []
+    for line in output:
+      try:
+        a = line.split(",")[0].replace('"',"")
+        if "http" in a:
+          article_urls.append(a)
+      except:
+        pass
+
     top_articles = []
-    for url in article_urls[0:news_interface.NUM_ARTICLES]:                                                                                                                         
-      top_articles.append(self.get_article(url))                                                                                                                                  
-      
-    return top_articles
+    for url in article_urls[0:news_interface.NUM_ARTICLES]:
+      top_articles.append(self.get_article(url))
+
+
 
