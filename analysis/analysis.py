@@ -13,11 +13,6 @@ BaselineNpChunkRule = ChunkRule(DefaultNpPattern,
                                 'Default rule for NP chunking')
 NpChunker = RegexpChunkParser([BaselineNpChunkRule])
 
-with open('loaded_words.txt', 'r') as f:
-  LOADED_WORDS = [line.strip('\n').lower()
-                  for line in f
-                  if not line.startswith('#')]
-
 def lemmatize(word, pos):
   # lemmatizes a word
   return nltk.stem.WordNetLemmatizer().lemmatize(word, pos)
@@ -150,17 +145,6 @@ def synset_distance(hypo, hyper):
     return float("inf")
   return 1 + min([synset_distance(new_hypo, hyper) for new_hypo in hypernyms])
 
-def get_NP_syns(article1_NPs, article2_NPs):
-  syns = []
-  for np1 in article1_NPs:
-    for np2 in article2_NPs:
-      if ((np1 in LOADED_WORDS) ^ (np2 in LOADED_WORDS)):
-        syn_match = determine_if_related(np1, np2)
-        if syn_match:
-          syns.append((np1, np2))
-
-  return syns
-
 def get_ancestors(synset):
   ancestors = synset.hypernyms()
   for hypernym in synset.hypernyms():
@@ -204,7 +188,6 @@ def compare_articles(article1, article2):
     text_NPs = get_NPs(article2["article_text"])
     article2_NPs = set(text_NPs.keys())
     diff_NPs = article2_NPs.difference(article1_NPs)
-#      print get_NP_syns(article1_NPs, article2_NPs)
     text_VPs = get_VPs(article2["article_text"])
     article2_VPs = set(text_VPs.keys())
     diff_VPs = article2_VPs.difference(article1_VPs)
