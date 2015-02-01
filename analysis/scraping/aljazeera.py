@@ -1,43 +1,27 @@
 from bs4 import BeautifulSoup
-import json
 import logging
-
+import re
 import requests
-
+import urllib2
 
 from logger import log
 import news_interface
 import news_orgs
 
-
-from BeautifulSoup import BeautifulSoup
-import urllib2
-import codecs
-import copy
-import re
-import argparse
-import sys
-
-
-
-
 logging.basicConfig(filename='aljazeera.log', level=logging.WARNING)
 
-class ALJAZEERA(news_interface.NewsOrg):
-  '''Methods for interacting with the AlJazeera website.'''
+class AlJazeera(news_interface.NewsOrg):
+  '''Methods for interacting with the Al Jazeera website.'''
 
   def get_article(self, url):
-    '''Implementation for getting an article from AlJazeera.
-                                                                                                                                                                                                                                                                                                                            
-    url: A URL in the www.aljazeera.* domain.                                                                                                                                                                                                                                                                                     
-                                                                                                                                                                                                                                                                                                                            
-    Returns: The Article representing the article at that url.                                                                                                                                                                                                                                                              
+    '''Implementation for getting an article from Al Jazeera.
+
+    Args:
+      url: A URL in the www.aljazeera.* domain.
+
+    Returns:
+      The Article representing the article at that url.
     '''
-
-
-  
-
-
     response = urllib2.urlopen(url)
     html = response.read()
     soup = BeautifulSoup(html)
@@ -52,12 +36,13 @@ class ALJAZEERA(news_interface.NewsOrg):
     return news_interface.Article(headline, body, url, news_orgs.ALJAZEERA)
 
   def get_query_results(self, query):
-   '''Implementation for keyword searches from BBC.                                                                                                                               
-                                                                                                                                         
-                                                                                                                                                                                                                                                                                                                            
-    query: A URL-encoded string.                                                                                                                                                                                                                                                                                            
-                                                                                                                                                                                                                                                                                                                            
-    Returns: A list of the top Articles returned by the query search.                                                                                                                                                                                                                                                       
+   '''Implementation for keyword searches from Al Jazeera.
+
+    Args:
+      query: A URL-encoded string.
+
+    Returns:
+      A list of the top Articles returned by the query search.
     '''
    res = requests.get("https://www.googleapis.com/customsearch/v1element?key=AIzaSyCVAXiUzRYsML1Pv6RwSG1gunmMikTzQqY&rsz=filtered_cse&num=10&hl=en&prettyPrint=false&source=gcsc&gss=.com&sig=23952f7483f1bca4119a89c020d13def&cx=007864276874919660377:szp4pg3raxu&q=%s&lr=lang_en&filter=1&sort=&googlehost=www.google.com&callback=google.search.Search.apiary7638&nocache=1422548009762" % (query))
 
@@ -70,9 +55,6 @@ class ALJAZEERA(news_interface.NewsOrg):
        article_urls.append(a+"l")
      except:
        pass
-   print article_urls
    top_articles = []
    for url in article_urls[0:news_interface.NUM_ARTICLES]:
      top_articles.append(self.get_article(url))
-
-
