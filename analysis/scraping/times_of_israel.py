@@ -26,8 +26,8 @@ class TimesOfIsrael(news_interface.NewsOrg):
     html = response.read()
     soup = BeautifulSoup(html)
 
-    a = soup.find("title")
-    headline = helpers.decode(a.text)
+    h1 = soup.find('h1', attrs={'class': 'headline'})
+    headline = helpers.decode(h1.text)
     paragraphs = soup.findAll("p", {"itemprop": "articleBody"})
     body = ' '.join([helpers.decode(p.text) for p in paragraphs])
 
