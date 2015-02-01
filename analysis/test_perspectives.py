@@ -25,5 +25,10 @@ class TestPerspectives(unittest.TestCase):
     headline = "Shots fired in Carlington area should lead to charges, police say"
     self._test_url_to_article(url, headline)
 
+  def test_url_to_article_cnn(self):
+    url = 'http://www.cnn.com/2015/01/31/entertainment/taiwan-scorcese-movie-set-accident/index.html'
+    headline = "One killed, 2 injured on set of Martin Scorsese's movie 'Silence' "
+    self._test_url_to_article(url, headline)
+
 if __name__ == '__main__':
   unittest.main()
