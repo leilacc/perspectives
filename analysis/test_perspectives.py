@@ -65,5 +65,10 @@ class TestPerspectives(unittest.TestCase):
     headline = "AirAsia captain left seat before jet lost control: sources"
     self._test_url_to_article(url, headline)
 
+  def test_url_to_article_rt(self):
+    url = 'http://rt.com/uk/228227-british-army-psychological-warfare/'
+    headline = "New British army elite unit to hone social media and psychological warfare"
+    self._test_url_to_article(url, headline)
+
 if __name__ == '__main__':
   unittest.main()
