@@ -3,6 +3,7 @@ import logging
 import requests
 import xmltodict
 
+import helpers
 from logger import log
 import news_interface
 import news_orgs
@@ -22,9 +23,9 @@ class USAToday(news_interface.NewsOrg):
     '''
     soup = BeautifulSoup(requests.get(url).text)
     article = soup.article
-    headline = article.h1.string
+    headline = helpers.decode(article.h1.string)
     paragraphs = article.find_all('p', attrs={'class': None})
-    body = ' '.join([p.get_text() for p in paragraphs])
+    body = ' '.join([helpers.decode(p.get_text()) for p in paragraphs])
     return news_interface.Article(headline, body, url, news_orgs.USA_TODAY)
 
   def get_query_results(self, query):
