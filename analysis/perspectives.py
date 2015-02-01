@@ -1,11 +1,12 @@
 '''Get perspectives from different articles.'''
 
+from scraping import logger
 import re
 
 import compare_articles
 import extract_keywords
 from scraping import aljazeera, bbc, cbc, cnn, globe_and_mail, guardian, \
-                     huff_post
+                     huff_post, jpost
 
 def get_perspectives(article):
   '''Get different perspectives on the topic covered by article.
@@ -38,20 +39,24 @@ def url_to_article(url):
   try:
     if re.search(r'.*aljazeera\.com/((opinions)|(articles)|(news))/.+', url):
       return aljazeera.AlJazeera().get_article(url)
-    if re.search(r'.*bbc\..+', url):
+    elif re.search(r'.*bbc\..+', url):
       return bbc.BBC().get_article(url)
-    if re.search(r'.*cbc\.ca/news/.+', url):
+    elif re.search(r'.*cbc\.ca/news/.+', url):
       return cbc.CBC().get_article(url)
-    if re.search(r'.*cnn\.com/.+', url):
+    elif re.search(r'.*cnn\.com/.+', url):
       return cnn.CNN().get_article(url)
-    if re.search(r'.*theglobeandmail\.com/.+', url):
+    elif re.search(r'.*theglobeandmail\.com/.+', url):
       return globe_and_mail.GlobeAndMail().get_article(url)
-    if re.search(r'.*theguardian\.com/.+', url):
+    elif re.search(r'.*theguardian\.com/.+', url):
       return guardian.Guardian().get_article(url)
-    if re.search(r'.*huffingtonpost\.c.+/.+', url):
+    elif re.search(r'.*huffingtonpost\.c.+/.+', url):
       return huff_post.HuffPost().get_article(url)
-  except:
-    log.info("Didn't regexp match for %s" % url)
+    elif re.search(r'.*jpost\.com/.+', url):
+      return jpost.JPost().get_article(url)
+    else:
+      logger.log.info("Didn't regexp match for %s" % url)
+  except Exception as e:
+    logger.log.info("Hit exception getting article for %s: %s" % (url, e))
     return None
 
 def query_all_news_orgs(query):

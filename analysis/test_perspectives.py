@@ -45,5 +45,10 @@ class TestPerspectives(unittest.TestCase):
     headline = "Disability and Debt: When One Happens to Canadians, the Other Follows"
     self._test_url_to_article(url, headline)
 
+  def test_url_to_article_jpost(self):
+    url = 'http://www.jpost.com/Opinion/Irans-nuclear-program-is-a-threat-389579'
+    headline = "Irans nuclear program is a threat"
+    self._test_url_to_article(url, headline)
+
 if __name__ == '__main__':
   unittest.main()
