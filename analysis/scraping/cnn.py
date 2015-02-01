@@ -28,7 +28,7 @@ class CNN(news_interface.NewsOrg):
     k = a.text.split("-")
     headline = k[0]
     date = k[1]
-    c = soup.findAll("p")
+    c = soup.findAll("p", attrs={'class': 'zn-body__paragraph'})
     body = ""
     for paragraph in c:
         try:
