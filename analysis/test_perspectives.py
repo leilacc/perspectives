@@ -30,5 +30,10 @@ class TestPerspectives(unittest.TestCase):
     headline = "One killed, 2 injured on set of Martin Scorsese's movie 'Silence' "
     self._test_url_to_article(url, headline)
 
+  def test_url_to_article_globe_and_mail(self):
+    url = 'http://www.theglobeandmail.com/globe-debate/syria-the-worlds-most-dangerous-place-for-journalists/article22732947/'
+    headline = "Syria: The worlds most dangerous place for journalists"
+    self._test_url_to_article(url, headline)
+
 if __name__ == '__main__':
   unittest.main()
