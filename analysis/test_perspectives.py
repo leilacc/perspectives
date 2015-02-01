@@ -60,5 +60,10 @@ class TestPerspectives(unittest.TestCase):
     headline = "Sundance Courts a New Celebrity Crowd"
     self._test_url_to_article(url, headline)
 
+  def test_url_to_article_reuters(self):
+    url = 'http://www.reuters.com/article/2015/01/31/us-indonesia-airplane-idUSKBN0L404E20150131'
+    headline = "AirAsia captain left seat before jet lost control: sources"
+    self._test_url_to_article(url, headline)
+
 if __name__ == '__main__':
   unittest.main()
