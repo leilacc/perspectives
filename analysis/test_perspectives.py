@@ -40,5 +40,10 @@ class TestPerspectives(unittest.TestCase):
     headline = "Carl Djerassi, chemist who developed the birth control pill, dies at age 91"
     self._test_url_to_article(url, headline)
 
+  def test_url_to_article_huff_post(self):
+    url = 'http://www.huffingtonpost.ca/jeffrey-schwartz/disability-and-debt_b_6582328.html'
+    headline = "Disability and Debt: When One Happens to Canadians, the Other Follows"
+    self._test_url_to_article(url, headline)
+
 if __name__ == '__main__':
   unittest.main()
