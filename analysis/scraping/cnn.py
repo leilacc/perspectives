@@ -37,7 +37,7 @@ class CNN(news_interface.NewsOrg):
             pass
     log.info(headline)
     log.info(body)
-    return news_interface.Article(headline,body,url,news_orgs.CNN)
+    return news_interface.Article(headline, body, url, news_orgs.CNN)
 
   def get_query_results(self, query):
     '''Implementation for keyword searches from CNN.
