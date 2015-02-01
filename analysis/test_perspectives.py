@@ -75,5 +75,10 @@ class TestPerspectives(unittest.TestCase):
     headline = "In Super Bowl matchup, Pats have Israel connections cornered"
     self._test_url_to_article(url, headline)
 
+  def test_url_to_article_todays_zaman(self):
+    url = 'http://www.todayszaman.com/interviews_speaking-of-islamo-christian-civilization-amidst-turmoil-of-clash-of-civilizations_371243.html'
+    headline = "Speaking of Islamo-Christian civilization amidst turmoil of clash of civilizations"
+    self._test_url_to_article(url, headline)
+
 if __name__ == '__main__':
   unittest.main()
