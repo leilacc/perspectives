@@ -4,7 +4,7 @@ import re
 
 import compare_articles
 import extract_keywords
-from scraping import aljazeera
+from scraping import aljazeera, bbc
 
 def get_perspectives(article):
   '''Get different perspectives on the topic covered by article.
@@ -34,8 +34,13 @@ def url_to_article(url):
     The Article that is scraped from url, if the url corresponds to an article
     on a supported news org page. Otherwise, None.
   '''
-  if re.search(r'.*aljazeera\.com/((opinions)|(articles)|(news))/.+', url):
-    return aljazeera.AlJazeera().get_article(url)
+  try:
+    if re.search(r'.*aljazeera\.com/((opinions)|(articles)|(news))/.+', url):
+      return aljazeera.AlJazeera().get_article(url)
+    if re.search(r'.*bbc\..+', url):
+      return bbc.BBC().get_article(url)
+  except:
+    return None
 
 def query_all_news_orgs(query):
   '''Get the top articles for the given query from all supported news orgs.
