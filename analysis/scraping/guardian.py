@@ -22,7 +22,7 @@ class Guardian(news_interface.NewsOrg):
     Returns: The Article representing the article at that url.
     '''
     soup = BeautifulSoup(requests.get(url).text)
-    headline = soup.h1.string
+    headline = soup.h1.string.strip('\n')
 
     if url.split('.com/')[1].startswith('theguardian'):
       article = soup.find('div', attrs={'class': 'flexible-content-body'})
