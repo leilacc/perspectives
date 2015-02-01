@@ -4,6 +4,7 @@ import logging
 import requests
 import urllib2
 
+import helpers
 from logger import log
 import news_interface
 import news_orgs
@@ -29,6 +30,7 @@ class AlJazeera(news_interface.NewsOrg):
       headline = soup.find("h1", {"class": "heading-story"}).string
     except AttributeError:
       headline = soup.find("h1", {"class": "articleOpinion-title"}).string
+    headline = helpers.decode(headline)
 
     try:
       paragraphs = soup.find("div", {"class": "article-body"})
@@ -36,7 +38,7 @@ class AlJazeera(news_interface.NewsOrg):
     except AttributeError:
       paragraphs = soup.find("div", {"class": "text"})
       article = paragraphs.findAll("p")
-    body = ' '.join([p.text.encode('ascii', 'ignore') for p in article])
+    body = ' '.join([helpers.decode(p.text) for p in article])
     #log.info(headline)
     #log.info(body)
     return news_interface.Article(headline, body, url, news_orgs.ALJAZEERA)

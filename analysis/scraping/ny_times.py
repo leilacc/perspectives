@@ -4,6 +4,7 @@ import logging
 import requests
 
 from api_keys import api_keys
+import helpers
 from logger import log
 import news_interface
 import news_orgs
@@ -22,7 +23,7 @@ class NYTimes(news_interface.NewsOrg):
     Returns: The Article representing the article at that url.
     '''
     soup = BeautifulSoup(requests.get(url).text)
-    headline = soup.h1.string
+    headline = helpers.decode(soup.h1.string)
 
     try:
       article = soup.find('div', attrs={'class': 'articleBody'})
@@ -33,7 +34,7 @@ class NYTimes(news_interface.NewsOrg):
       article = soup.find('div', attrs={'class': 'story-body'})
       paragraphs = article.find_all('p', attrs={'class': 'story-content'})
 
-    p_text = [p.get_text() for p in paragraphs]
+    p_text = [helpers.decode(p.get_text()) for p in paragraphs]
     body = ' '.join([p for p in p_text])
 
     log.info(headline)

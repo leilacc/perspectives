@@ -3,6 +3,7 @@ import json
 import logging
 import requests
 
+import helpers
 from logger import log
 import news_interface
 import news_orgs
@@ -28,10 +29,11 @@ class NYPost(news_interface.NewsOrg):
     Returns: The Article representing the article at that url.
     '''
     soup = BeautifulSoup(requests.get(url).text)
-    headline = soup.h1.a.string
+    headline = helpers.decode(soup.h1.a.string)
     article = soup.find('div', attrs={'class': 'entry-content'})
     paragraphs = article.find_all('p', attrs={'class': None})
-    body = ' '.join([p.get_text() for p in paragraphs])
+    body = ' '.join(
+        [helpers.decode(p.get_text()) for p in paragraphs])
     log.info(headline)
     log.info(body)
     return news_interface.Article(headline, body, url, news_orgs.NY_POST)
