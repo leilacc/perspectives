@@ -1,53 +1,47 @@
 from bs4 import BeautifulSoup
-import json
 import logging
 import requests
 
-
+import helpers
 from logger import log
 import news_interface
 import news_orgs
 
-
-from BeautifulSoup import BeautifulSoup
 import urllib2
-import codecs
-import copy
-import re
-import argparse
-import sys
-import json
-import wget
 
 
 logging.basicConfig(filename='todays_zaman.log', level=logging.WARNING)
 
-class TODAYSZAMAN(news_interface.NewsOrg):
+class TodaysZaman(news_interface.NewsOrg):
   '''Methods for interacting with the Todays Zaman website.'''
 
   def get_article(self, url):
-    '''Implementation for getting an article from Todays Zaman
-                                                                                                                                                                                                                                                                                                                            
-    url: A URL in the www.todayszaman.* domain.                                                                                                                                                                                                                                                                                     
-                                                                                                                                                                                                                                                                                                                            
-    Returns: The Article representing the article at that url.                                                                                                                                                                                                                                                              
+    '''Implementation for getting an article from Todays Zaman.
+
+    Args:
+      url: A URL in the www.todayszaman.com/* domain.
+
+    Returns:
+      The Article representing the article at that url.
     '''
     soup = BeautifulSoup(requests.get(url).text)
     a = soup.find("title")
-    headline = a.text.encode('ascii', 'ignore')
+    headline = helpers.decode(a.text)
     paragraphs = soup.find("div", {"id": "newsText"})
     article = paragraphs.findAll("p")
-    body = ' '.join([p.text.encode('ascii', 'ignore') for p in article])
+    body = ' '.join([helpers.decode(p.text) for p in article])
     log.info(headline)
     log.info(body)
-    return news_interface.Article(headline, body, url, news_orgs.TODAYSZAMAN)
+    return news_interface.Article(headline, body, url, news_orgs.TODAYS_ZAMAN)
 
   def get_query_results(self, query):
-    '''Implementation for keyword searches from Todays Zaman.                                                                                                                                                                                                                                                                        
-                                                                                                                                                                                                                                                                                                                            
-    query: A URL-encoded string.                                                                                                                                                                                                                                                                                            
+    '''Implementation for keyword searches from Todays Zaman.
 
-    Returns: A list of the top Articles returned by the query search.                                                                                                                                                                                                                                                       
+    Args:
+      query: A URL-encoded string.
+
+    Returns:
+      A list of the top Articles returned by the query search.
     '''
 
     res = requests.get(
@@ -57,7 +51,6 @@ class TODAYSZAMAN(news_interface.NewsOrg):
     articles = soup.findAll("div", {"class": "pageSearchMainContentText"})
 
     article_urls = [article.a.get('href') for article in articles]
-
 
     top_articles = []
     for url in article_urls[0:news_interface.NUM_ARTICLES]:
