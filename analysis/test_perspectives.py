@@ -50,5 +50,15 @@ class TestPerspectives(unittest.TestCase):
     headline = "Irans nuclear program is a threat"
     self._test_url_to_article(url, headline)
 
+  def test_url_to_article_ny_post(self):
+    url = 'http://nypost.com/2015/01/31/why-picking-a-super-bowl-side-is-such-a-nightmare/'
+    headline = "Why picking a Super Bowl side is such anightmare"
+    self._test_url_to_article(url, headline)
+
+  def test_url_to_article_ny_times(self):
+    url = 'http://www.nytimes.com/2015/02/01/style/sundance-courts-a-new-celebrity-crowd.html?action=click&pgtype=Homepage&module=c-column-middle-span-region&region=c-column-middle-span-region&WT.nav=c-column-middle-span-region&_r=0'
+    headline = "Sundance Courts a New Celebrity Crowd"
+    self._test_url_to_article(url, headline)
+
 if __name__ == '__main__':
   unittest.main()
