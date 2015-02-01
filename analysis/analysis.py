@@ -169,26 +169,16 @@ def get_tree(sentence):
     tagged_tokens = nltk.pos_tag(tokens)
     return NpChunker.parse(tagged_tokens)
 
-def differential(articles):
-  articles = articles["results"]["news_sources"]
-  main_article = articles[0]
-  all_results = []
-  for comparison_article in articles[1:]:
-    article_results = comparison_article
-    article_results['sentences'] = compare_articles(main_article, comparison_article)
-    all_results.append(article_results)
-  return json.dumps(all_results)
-
 def compare_articles(article1, article2):
-    text_NPs = get_NPs(article1["article_text"])
+    text_NPs = get_NPs(article1.body)
     article1_NPs = set(text_NPs.keys())
-    text_VPs = get_VPs(article1["article_text"])
+    text_VPs = get_VPs(article1.body)
     article1_VPs = set(text_VPs.keys())
 
-    text_NPs = get_NPs(article2["article_text"])
+    text_NPs = get_NPs(article2.body)
     article2_NPs = set(text_NPs.keys())
     diff_NPs = article2_NPs.difference(article1_NPs)
-    text_VPs = get_VPs(article2["article_text"])
+    text_VPs = get_VPs(article2.body)
     article2_VPs = set(text_VPs.keys())
     diff_VPs = article2_VPs.difference(article1_VPs)
 
@@ -235,9 +225,27 @@ def compare_articles(article1, article2):
 
     return sentences.values()
 
+def differential(article, comparison_articles):
+  '''Compares article to the comparison_articles.
+
+  Args:
+    article: an Article
+    comparison_articles: a list of Articles to be compared to Article
+
+  Returns:
+    The list of comparison_articles in JSON format, with a 'sentences'
+    attribute containing a list of sentences with different facts from the
+    original article.
+    '''
+  all_results = []
+  for comparison_article in comparison_articles:
+    comparison_results = comparison_article.to_dict()
+    comparison_results['sentences'] = compare_articles(article,
+                                                       comparison_article)
+    all_results.append(comparison_results)
+  return json.dumps(all_results)
+
 if __name__ == '__main__':
-  with open('test_articles/full_test.json') as article1:
-    print differential(json.load(article1))
   '''
   with open('test_articles/article1.json') as article1:
     article1 = json.load(article1)
