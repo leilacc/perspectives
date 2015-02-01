@@ -244,14 +244,3 @@ def differential(article, comparison_articles):
                                                        comparison_article)
     all_results.append(comparison_results)
   return json.dumps(all_results)
-
-if __name__ == '__main__':
-  '''
-  with open('test_articles/article1.json') as article1:
-    article1 = json.load(article1)
-
-    with open('test_articles/article2.json') as article2:
-      article2 = json.load(article2)
-
-      print [val for val in compare_articles(article1, article2)]
-      '''
