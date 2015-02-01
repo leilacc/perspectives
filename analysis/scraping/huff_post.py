@@ -16,9 +16,11 @@ class HuffPost(news_interface.NewsOrg):
   def get_article(self, url):
     '''Implementation for getting an article from Huffington Post.
 
-    url: A URL in the www.huffingtonpost.* domain.
+    Args:
+      url: A URL in the www.huffingtonpost.* domain.
 
-    Returns: The Article representing the article at that url.
+    Returns:
+      The Article representing the article at that url.
     '''
     soup = BeautifulSoup(requests.get(url).text)
     headline = soup.h1.string
@@ -31,9 +33,11 @@ class HuffPost(news_interface.NewsOrg):
   def get_query_results(self, query):
     '''Implementation for keyword searches from Huffington Post.
 
-    query: A URL-encoded string.
+    Args:
+      query: A URL-encoded string.
 
-    Returns: A list of the top Articles returned by the query search.
+    Returns:
+      A list of the top Articles returned by the query search.
     '''
     res = requests.get(
         'https://www.googleapis.com/customsearch/v1element?key=%s&rsz=10&num=10&hl=en&prettyPrint=false&source=gcsc&gss=.com&sig=23952f7483f1bca4119a89c020d13def&cx=004830092955692134028:an6per91wyc&q=%s&as_sitesearch=huffingtonpost.com&googlehost=www.google.com&callback=google.search.Search.apiary17234&nocache=1422138917068'
