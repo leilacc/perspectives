@@ -62,6 +62,8 @@ def url_to_article(url):
       return reuters.Reuters().get_article(url)
     elif re.search(r'.*rt\.com/.+', url):
       return russia_today.RussiaToday().get_article(url)
+    elif re.search(r'.*timesofisrael\.com/.+', url):
+      return times_of_israel.RussiaToday().get_article(url)
     else:
       logger.log.info("Didn't regexp match for %s" % url)
   except Exception as e:

@@ -3,6 +3,7 @@ import logging
 import requests
 
 from api_keys import api_keys
+import helpers
 from logger import log
 import news_interface
 import news_orgs
@@ -22,11 +23,11 @@ class RussiaToday(news_interface.NewsOrg):
     '''
     # Encoding is off; re-encoding as ascii fixes most of it
     soup = BeautifulSoup(requests.get(url).text.encode('ascii', 'ignore'))
-    headline = soup.h1.string
+    headline = helpers.decode(soup.h1.string)
 
     article = soup.find('div', attrs={'class': 'cont-wp'})
     paragraphs = article.find_all('p', attrs={'class': None})
-    p_text = [p.get_text() for p in paragraphs]
+    p_text = [helpers.decode(p.get_text()) for p in paragraphs]
     # Get rid of 'Tags' and 'Trends' headers, and 'READ MORE' links
     body = ' '.join([p for p in p_text if not (p.startswith('\nREAD') or
                                       p == 'Tags' or
