@@ -4,7 +4,7 @@ import re
 
 import compare_articles
 import extract_keywords
-from scraping import aljazeera, bbc
+from scraping import aljazeera, bbc, cbc
 
 def get_perspectives(article):
   '''Get different perspectives on the topic covered by article.
@@ -39,7 +39,10 @@ def url_to_article(url):
       return aljazeera.AlJazeera().get_article(url)
     if re.search(r'.*bbc\..+', url):
       return bbc.BBC().get_article(url)
+    if re.search(r'.*cbc\.ca/news/.+', url):
+      return cbc.CBC().get_article(url)
   except:
+    log.info("Didn't regexp match for %s" % url)
     return None
 
 def query_all_news_orgs(query):
