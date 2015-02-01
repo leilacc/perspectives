@@ -41,3 +41,18 @@ class Article:
     self.body = body
     self.link = link
     self.news_org = news_org
+
+  def to_dict(self):
+    '''Return the Article represented in dictionary form.
+
+    article: an Article
+
+    Returns: A dictionary representation of the article.
+    '''
+    article_dict = {}
+    article_dict["headline"] = self.headline
+    article_dict["body"] = self.body
+    article_dict["link"] = self.link
+    article_dict["news_org"] = self.news_org
+    return article_dict
+
