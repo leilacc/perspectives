@@ -35,5 +35,10 @@ class TestPerspectives(unittest.TestCase):
     headline = "Syria: The worlds most dangerous place for journalists"
     self._test_url_to_article(url, headline)
 
+  def test_url_to_article_guardian(self):
+    url = 'http://www.theguardian.com/us-news/2015/feb/01/carl-djerassi-chemist-considered-father-of-birth-control-pill-dies-at-age-91-0'
+    headline = "Carl Djerassi, chemist who developed the birth control pill, dies at age 91"
+    self._test_url_to_article(url, headline)
+
 if __name__ == '__main__':
   unittest.main()
