@@ -20,8 +20,8 @@ class TestAnalysis(unittest.TestCase):
     res = extract_keywords.extract_keywords(headline)
     self.assertEqual(res, 'nbc ayman mohyeldin')
 
-  def test_differential(self):
-    diff = analysis.differential(self.articles[0], self.articles[1:])
+  def test_compare_to_all_articles(self):
+    diff = analysis.compare_to_all_articles(self.articles[0], self.articles[1:])
     diff = json.loads(diff)
     self.assertEqual(len(diff), 4, 'Expected 4 comparison articles')
     self.assertEqual(diff[0]['sentences'][0],

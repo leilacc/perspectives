@@ -225,7 +225,7 @@ def compare_articles(article1, article2):
 
     return sentences.values()
 
-def differential(article, comparison_articles):
+def compare_to_all_articles(article, comparison_articles):
   '''Compares article to the comparison_articles.
 
   Args:
