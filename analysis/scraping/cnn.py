@@ -1,15 +1,11 @@
 from bs4 import BeautifulSoup
-import json
 import logging
 import requests
+import urllib2
 
 from logger import log
 import news_interface
 import news_orgs
-from BeautifulSoup import BeautifulSoup
-import urllib2
-
-
 
 logging.basicConfig(filename='cnn.log', level=logging.WARNING)
 
@@ -17,13 +13,14 @@ class CNN(news_interface.NewsOrg):
   '''Methods for interacting with the CNN website.'''
 
   def get_article(self, url):
-    '''Implementation for getting an article from CNN.                                                                                                                                                                                                                                                                      
-                                                                                                                                                                                                                                                                                                                           
-    url: A URL in the www.cnn.* domain.                                                                                                                                                                                                                                                                                     
-                                                                                                                                                                                                                                                                                                                            
-    Returns: The Article representing the article at that url.                                                                                                                                                                                                                                                              
-    '''
+    '''Implementation for getting an article from CNN.
 
+    Args:
+      url: A URL in the www.cnn.* domain.
+
+    Returns:
+      The Article representing the article at that url.
+    '''
     response = urllib2.urlopen(url)
     html = response.read()
     soup = BeautifulSoup(html)
@@ -42,14 +39,14 @@ class CNN(news_interface.NewsOrg):
     log.info(body)
     return news_interface.Article(headline,body,url,news_orgs.CNN)
 
-
-
   def get_query_results(self, query):
-    '''Implementation for keyword searches from CNN                                                                                                                                                                                                                                                                        
-                                                                                                                                                                                                                                                                                                                            
-    query: A URL-encoded string.                                                                                                                                                                                                                                                                                            
-                                                                                                                                                                                                                                                                                                                            
-    Returns: A list of the top Articles returned by the query search.                                                                                                                                                                                                                                                       
+    '''Implementation for keyword searches from CNN.
+
+    Args:
+      query: A URL-encoded string.
+
+    Returns:
+      A list of the top Articles returned by the query search.
     '''
     res = requests.get("http://searchapp.cnn.com/search/query.jsp?page=1&npp=10&start=1&text=%s&type=all&bucket=true&sort=relevance&csiID=csi1" % (query))
     output = res.text.encode('ascii', 'ignore').split("\"url\":")
@@ -66,6 +63,4 @@ class CNN(news_interface.NewsOrg):
     top_articles = []
     for url in article_urls[0:news_interface.NUM_ARTICLES]:
       top_articles.append(self.get_article(url))
-
-
-
+    return top_articles
