@@ -7,7 +7,7 @@ import compare_articles
 import extract_keywords
 from scraping import aljazeera, bbc, cbc, cnn, globe_and_mail, guardian, \
                      huff_post, jpost, ny_post, ny_times, reuters, \
-                     russia_today, times_of_israel, todays_zaman
+                     russia_today, times_of_israel, todays_zaman, usa_today
 
 def get_perspectives(article):
   '''Get different perspectives on the topic covered by article.
@@ -66,6 +66,8 @@ def url_to_article(url):
       return times_of_israel.TimesOfIsrael().get_article(url)
     elif re.search(r'.*todayszaman\.com/.+', url):
       return todays_zaman.TodaysZaman().get_article(url)
+    elif re.search(r'.*usatoday\.com/story/.+', url):
+      return usa_today.USAToday().get_article(url)
     else:
       logger.log.info("Didn't regexp match for %s" % url)
   except Exception as e:

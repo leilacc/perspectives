@@ -80,5 +80,10 @@ class TestPerspectives(unittest.TestCase):
     headline = "Speaking of Islamo-Christian civilization amidst turmoil of clash of civilizations"
     self._test_url_to_article(url, headline)
 
+  def test_url_to_article_usa_today(self):
+    url = 'http://www.usatoday.com/story/todayinthesky/2015/01/31/airlines-already-canceling-flights-as-new-storm-looms/22682285/'
+    headline = "Airlines already canceling flights as new storm looms"
+    self._test_url_to_article(url, headline)
+
 if __name__ == '__main__':
   unittest.main()
