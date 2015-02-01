@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup
+import json
 import logging
-import re
 import requests
 import urllib2
 
@@ -17,7 +17,7 @@ class AlJazeera(news_interface.NewsOrg):
     '''Implementation for getting an article from Al Jazeera.
 
     Args:
-      url: A URL in the www.aljazeera.* domain.
+      url: A URL in the aljazeera.* domain.
 
     Returns:
       The Article representing the article at that url.
@@ -25,18 +25,24 @@ class AlJazeera(news_interface.NewsOrg):
     response = urllib2.urlopen(url)
     html = response.read()
     soup = BeautifulSoup(html)
-    a = soup.find("title")
-    headline = a.text
+    try:
+      headline = soup.find("h1", {"class": "heading-story"}).string
+    except AttributeError:
+      headline = soup.find("h1", {"class": "articleOpinion-title"}).string
 
-    paragraphs = soup.find("div", {"class": "text section"})
-    article = paragraphs.findAll("p")
+    try:
+      paragraphs = soup.find("div", {"class": "article-body"})
+      article = paragraphs.findAll("p")
+    except AttributeError:
+      paragraphs = soup.find("div", {"class": "text"})
+      article = paragraphs.findAll("p")
     body = ' '.join([p.text.encode('ascii', 'ignore') for p in article])
-    log.info(headline)
-    log.info(body)
+    #log.info(headline)
+    #log.info(body)
     return news_interface.Article(headline, body, url, news_orgs.ALJAZEERA)
 
   def get_query_results(self, query):
-   '''Implementation for keyword searches from Al Jazeera.
+    '''Implementation for keyword searches from Al Jazeera.
 
     Args:
       query: A URL-encoded string.
@@ -44,17 +50,14 @@ class AlJazeera(news_interface.NewsOrg):
     Returns:
       A list of the top Articles returned by the query search.
     '''
-   res = requests.get("https://www.googleapis.com/customsearch/v1element?key=AIzaSyCVAXiUzRYsML1Pv6RwSG1gunmMikTzQqY&rsz=filtered_cse&num=10&hl=en&prettyPrint=false&source=gcsc&gss=.com&sig=23952f7483f1bca4119a89c020d13def&cx=007864276874919660377:szp4pg3raxu&q=%s&lr=lang_en&filter=1&sort=&googlehost=www.google.com&callback=google.search.Search.apiary7638&nocache=1422548009762" % (query))
+    res = requests.get("https://www.googleapis.com/customsearch/v1element?key=AIzaSyCVAXiUzRYsML1Pv6RwSG1gunmMikTzQqY&rsz=filtered_cse&num=10&hl=en&prettyPrint=false&source=gcsc&gss=.com&sig=23952f7483f1bca4119a89c020d13def&cx=007864276874919660377:szp4pg3raxu&q=%s&lr=lang_en&filter=1&sort=&googlehost=www.google.com&callback=google.search.Search.apiary7638&nocache=1422548009762" % (query))
 
-   output = res.text.encode('ascii', 'ignore').split("\"ogUrl\":")
-   article_urls = []
-   for line in output:
-     article= re.search('http:.*.aljazeera.*.html","ogType":"article"',line)
-     try:
-       a = article.group(0).strip('","ogType":"article"')
-       article_urls.append(a+"l")
-     except:
-       pass
-   top_articles = []
-   for url in article_urls[0:news_interface.NUM_ARTICLES]:
-     top_articles.append(self.get_article(url))
+    json_res = res.text.encode('ascii', 'ignore')[48:-2]
+    json_res = json.loads(json_res)['results']
+    article_urls = [result['url'] for result in json_res]
+    top_articles = []
+    for url in article_urls:
+      log.info(url)
+      if 'topics' not in url and 'blogs' not in url: # not an article page
+        top_articles.append(self.get_article(url))
+    return top_articles[0:news_interface.NUM_ARTICLES]
