@@ -70,5 +70,10 @@ class TestPerspectives(unittest.TestCase):
     headline = "New British army elite unit to hone social media and psychological warfare"
     self._test_url_to_article(url, headline)
 
+  def test_url_to_article_times_of_israel(self):
+    url = 'http://www.timesofisrael.com/in-super-bowl-matchup-pats-have-israel-connections-cornered/'
+    headline = "In Super Bowl matchup, Pats have Israel connections cornered"
+    self._test_url_to_article(url, headline)
+
 if __name__ == '__main__':
   unittest.main()
