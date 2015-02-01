@@ -17,14 +17,14 @@ class GlobeAndMail(news_interface.NewsOrg):
   def get_article(self, url):
     '''Implementation for getting an article from the Globe and Mail.
 
-    url: A URL in the globe_and_mail.ca/news/* domain.
+    url: A URL in the theglobeandmail.com/* domain.
 
     Returns: The Article representing the article at that url.
     '''
     soup = BeautifulSoup(requests.get(url).text)
 
     soup.h1.a.extract()
-    headline = soup.h1.get_text()
+    headline = soup.h1.get_text().encode('ascii', 'ignore').strip('\n')
     article = soup.find('div', attrs={'class': 'entry-content'})
 
     # Remove other content that is inline with the article text
@@ -32,7 +32,7 @@ class GlobeAndMail(news_interface.NewsOrg):
     [aside.extract() for aside in article.find_all('aside')]
 
     paragraphs = article.find_all('p', attrs={'class': None})
-    body = ' '.join([p.get_text() for p in paragraphs])
+    body = ' '.join([p.get_text().encode('ascii', 'ignore') for p in paragraphs])
 
     log.info(headline)
     log.info(body)
