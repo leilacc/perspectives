@@ -239,8 +239,9 @@ def compare_to_all_articles(article, comparison_articles):
     '''
   all_results = []
   for comparison_article in comparison_articles:
-    comparison_results = comparison_article.to_dict()
-    comparison_results['sentences'] = compare_articles(article,
-                                                       comparison_article)
-    all_results.append(comparison_results)
+    if comparison_article:
+      comparison_results = comparison_article.to_dict()
+      comparison_results['sentences'] = compare_articles(article,
+                                                         comparison_article)
+      all_results.append(comparison_results)
   return json.dumps(all_results)
