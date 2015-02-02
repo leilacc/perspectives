@@ -3,6 +3,7 @@ import logging
 import requests
 import urllib2
 
+import helpers
 from logger import log
 import news_interface
 import news_orgs
@@ -21,8 +22,10 @@ class CNN(news_interface.NewsOrg):
     Returns:
       The Article representing the article at that url.
     '''
-    response = urllib2.urlopen(url)
-    html = response.read()
+    html = helpers.get_content(url)
+    if not html:
+      return None
+
     soup = BeautifulSoup(html)
     a = soup.find("title")
     k = a.text.split("-")

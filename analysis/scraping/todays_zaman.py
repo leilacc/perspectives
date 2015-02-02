@@ -24,7 +24,11 @@ class TodaysZaman(news_interface.NewsOrg):
     Returns:
       The Article representing the article at that url.
     '''
-    soup = BeautifulSoup(requests.get(url).text)
+    html = helpers.get_content(url)
+    if not html:
+      return None
+
+    soup = BeautifulSoup(html)
     a = soup.find("title")
     headline = helpers.decode(a.text)
     paragraphs = soup.find("div", {"id": "newsText"})

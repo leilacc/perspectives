@@ -3,6 +3,7 @@ import json
 import logging
 import requests
 
+import helpers
 from logger import log
 import news_interface
 import news_orgs
@@ -19,10 +20,22 @@ class CBC(news_interface.NewsOrg):
 
     url: A URL in the cbc.ca/news/* domain.
 
-    Returns: The Article representing the article at that url.
+    Returns: The Article representing the article at that url, or None if
+    unable to scrape the article.
     '''
-    soup = BeautifulSoup(requests.get(url).text)
-    headline = soup.h1.string
+    html = helpers.get_content(url)
+    if not html:
+      return None
+
+    soup = BeautifulSoup(html)
+
+    try:
+      headline = soup.h1.string
+    except AttributeError:
+      log.error('Exception trying to scrape CBC headline from %s'
+                % (url))
+      return None
+
     article = soup.find('div', attrs={'class': 'story-content'})
     paragraphs = article.find_all('p', attrs={'class': None})
     body = ' '.join([p.get_text() for p in paragraphs])

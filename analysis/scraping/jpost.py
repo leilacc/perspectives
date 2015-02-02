@@ -3,6 +3,7 @@ import logging
 import requests
 import urllib2
 
+import helpers
 from logger import log
 import news_interface
 import news_orgs
@@ -21,9 +22,10 @@ class JPost(news_interface.NewsOrg):
     Returns:
       The Article representing the article at that url.
     '''
+    html = helpers.get_content(url)
+    if not html:
+      return None
 
-    response = urllib2.urlopen(url)
-    html = response.read()
     soup = BeautifulSoup(html)
     a = soup.find('h1', attrs={'class': 'article-title'})
     headline = a.text.encode('ascii', 'ignore').strip().strip('\r\n')

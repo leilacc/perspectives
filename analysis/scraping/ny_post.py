@@ -28,7 +28,11 @@ class NYPost(news_interface.NewsOrg):
 
     Returns: The Article representing the article at that url.
     '''
-    soup = BeautifulSoup(requests.get(url).text)
+    html = helpers.get_content(url)
+    if not html:
+      return None
+
+    soup = BeautifulSoup(html)
     headline = helpers.decode(soup.h1.a.string)
     article = soup.find('div', attrs={'class': 'entry-content'})
     paragraphs = article.find_all('p', attrs={'class': None})

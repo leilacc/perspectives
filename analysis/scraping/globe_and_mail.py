@@ -3,6 +3,7 @@ import json
 import logging
 import requests
 
+import helpers
 from logger import log
 import news_interface
 import news_orgs
@@ -21,7 +22,11 @@ class GlobeAndMail(news_interface.NewsOrg):
 
     Returns: The Article representing the article at that url.
     '''
-    soup = BeautifulSoup(requests.get(url).text)
+    html = helpers.get_content(url)
+    if not html:
+      return None
+
+    soup = BeautifulSoup(html)
 
     soup.h1.a.extract()
     headline = soup.h1.get_text().encode('ascii', 'ignore').strip('\n')

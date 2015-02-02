@@ -21,8 +21,11 @@ class RussiaToday(news_interface.NewsOrg):
 
     Returns: The Article representing the article at that url.
     '''
-    # Encoding is off; re-encoding as ascii fixes most of it
-    soup = BeautifulSoup(requests.get(url).text.encode('ascii', 'ignore'))
+    html = helpers.get_content(url)
+    if not html:
+      return None
+
+    soup = BeautifulSoup(html)
     headline = helpers.decode(soup.h1.string)
 
     article = soup.find('div', attrs={'class': 'cont-wp'})

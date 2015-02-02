@@ -19,7 +19,11 @@ class Reuters(news_interface.NewsOrg):
 
     Returns: The Article representing the article at that url.
     '''
-    soup = BeautifulSoup(requests.get(url).text)
+    html = helpers.get_content(url)
+    if not html:
+      return None
+
+    soup = BeautifulSoup(html)
     headline_div = soup.find('div', attrs={'class': 'column1 gridPanel grid8'})
     headline = helpers.decode(headline_div.h1.string)
     paragraphs = soup.find('div', attrs={'class': 'column1 gridPanel grid8'}).findAll("p")

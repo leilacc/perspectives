@@ -3,6 +3,7 @@ import json
 import logging
 import requests
 
+import helpers
 from logger import log
 import news_interface
 import news_orgs
@@ -22,7 +23,11 @@ class HuffPost(news_interface.NewsOrg):
     Returns:
       The Article representing the article at that url.
     '''
-    soup = BeautifulSoup(requests.get(url).text)
+    html = helpers.get_content(url)
+    if not html:
+      return None
+
+    soup = BeautifulSoup(html)
     headline = soup.h1.string
     article = soup.find('article', attrs={'class': 'entry'})
     paragraphs = article.find_all('p', attrs={'class': None})

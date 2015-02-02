@@ -21,15 +21,28 @@ class AlJazeera(news_interface.NewsOrg):
       url: A URL in the aljazeera.* domain.
 
     Returns:
-      The Article representing the article at that url.
+      The Article representing the article at that url, or None if unable to
+      get the Article.
     '''
-    response = urllib2.urlopen(url)
-    html = response.read()
+    html = helpers.get_content(url)
+    if not html:
+      return None
+
     soup = BeautifulSoup(html)
-    try:
-      headline = soup.find("h1", {"class": "heading-story"}).string
-    except AttributeError:
-      headline = soup.find("h1", {"class": "articleOpinion-title"}).string
+
+    headline = None
+    potential_classes = ["heading-story", "articleOpinion-title"]
+    for h1_class in potential_classes:
+      try:
+        headline = soup.find("h1", {"class": h1_class}).string
+        break
+      except AttributeError:
+        continue
+    if not headline:
+      log.error('Exception trying to scrape Al Jazeera headline from %s'
+                % (url))
+      return None
+
     headline = helpers.decode(headline)
 
     try:
