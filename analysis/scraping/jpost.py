@@ -27,12 +27,16 @@ class JPost(news_interface.NewsOrg):
       return None
 
     soup = BeautifulSoup(html)
-    a = soup.find('h1', attrs={'class': 'article-title'})
-    headline = a.text.encode('ascii', 'ignore').strip().strip('\r\n')
-    paragraphs = soup.find("div", {"class": "article-text"})
-    article = paragraphs.find("p")
 
-    body = article.text.encode('ascii', 'ignore')
+    try:
+      a = soup.find('h1', attrs={'class': 'article-title'})
+      headline = a.text.strip().strip('\r\n')
+      paragraphs = soup.find("div", {"class": "article-text"})
+      article = paragraphs.find("p")
+    except Exception as e:
+      log.error('Error scraping JPost article at %s: %s' % (url, e))
+
+    body = article.text
 
     log.info(headline)
     log.info(body)
