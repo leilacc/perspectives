@@ -1,9 +1,26 @@
+import json
 import unittest
 
 import perspectives
 from scraping import news_interface
 
 class TestPerspectives(unittest.TestCase):
+
+  def test_get_perspectives(self):
+    url = 'http://jpost.com/Israel-News/ICC-rejects-pro-Turkey-war-crimes-allegations-against-IDF-in-Gaza-flotilla-raid-380955'
+    res = perspectives.get_perspectives(url)
+    compared_articles = json.loads(res)
+    self.assertTrue(len(compared_articles) > 10)
+    self.assertTrue(compared_articles[0]['sentences'])
+
+  def test_query_all_news_orgs(self):
+    query = 'charlie+hebdo'
+    articles = perspectives.query_all_news_orgs(query)
+    self.assertTrue(len(articles) > 10)
+    for article in articles:
+      if article:
+        self.assertTrue(isinstance(article, news_interface.Article))
+  '''
 
   def _test_url_to_article(self, url, headline):
     article = perspectives.url_to_article(url)
@@ -84,6 +101,6 @@ class TestPerspectives(unittest.TestCase):
     url = 'http://www.usatoday.com/story/todayinthesky/2015/01/31/airlines-already-canceling-flights-as-new-storm-looms/22682285/'
     headline = "Airlines already canceling flights as new storm looms"
     self._test_url_to_article(url, headline)
-
+'''
 if __name__ == '__main__':
   unittest.main()
