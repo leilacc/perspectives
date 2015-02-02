@@ -20,7 +20,6 @@ class TestPerspectives(unittest.TestCase):
     for article in articles:
       if article:
         self.assertTrue(isinstance(article, news_interface.Article))
-  '''
 
   def _test_url_to_article(self, url, headline):
     article = perspectives.url_to_article(url)
@@ -101,6 +100,6 @@ class TestPerspectives(unittest.TestCase):
     url = 'http://www.usatoday.com/story/todayinthesky/2015/01/31/airlines-already-canceling-flights-as-new-storm-looms/22682285/'
     headline = "Airlines already canceling flights as new storm looms"
     self._test_url_to_article(url, headline)
-'''
+
 if __name__ == '__main__':
   unittest.main()
