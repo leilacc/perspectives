@@ -18,6 +18,8 @@ html {
 
 body {
   margin: 0;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
 }
 
 /* HTML5 display definitions
