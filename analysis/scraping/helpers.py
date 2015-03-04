@@ -5,15 +5,17 @@ import requests
 from logger import log
 
 def decode(strr):
-  '''Decodes strings that were scraped from the web.'''
-  strr = re.sub(r'&nbsp;', ' ', strr)
+  '''Decodes strings that were scraped from the web. Fixes spacing'''
   strr = strr.strip().strip('\r\n').strip('\n')
   return strr
 
 def get_content(url):
   '''Returns the text content of a webpage, encoded as ASCII.'''
   try:
-    return requests.get(url).text.encode('ascii', 'ignore')
+    text = requests.get(url).text
+    text = re.sub(r'&nbsp;', ' ', text)
+    text = text.strip().strip('\r\n').strip('\n')
+    return text.encode('ascii', 'ignore')
   except Exception as e:
     log.error('Error opening url %s: %s' % (url, e))
     return None
