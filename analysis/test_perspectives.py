@@ -68,7 +68,7 @@ class TestPerspectives(unittest.TestCase):
 
   def test_url_to_article_ny_post(self):
     url = 'http://nypost.com/2015/01/31/why-picking-a-super-bowl-side-is-such-a-nightmare/'
-    headline = "Why picking a Super Bowl side is such anightmare"
+    headline = "Why picking a Super Bowl side is such a nightmare"
     self._test_url_to_article(url, headline)
 
   def test_url_to_article_ny_times(self):
@@ -88,7 +88,7 @@ class TestPerspectives(unittest.TestCase):
 
   def test_url_to_article_times_of_israel(self):
     url = 'http://www.timesofisrael.com/in-super-bowl-matchup-pats-have-israel-connections-cornered/'
-    headline = "In Super Bowl matchup, Pats have Israel connections cornered"
+    headline = "In Super Bowl matchup, Pats have Israel connections covered"
     self._test_url_to_article(url, headline)
 
   def test_url_to_article_todays_zaman(self):
