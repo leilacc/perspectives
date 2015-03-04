@@ -170,60 +170,62 @@ def get_tree(sentence):
     return NpChunker.parse(tagged_tokens)
 
 def compare_articles(article1, article2):
-    text_NPs = get_NPs(article1.body)
-    article1_NPs = set(text_NPs.keys())
-    text_VPs = get_VPs(article1.body)
-    article1_VPs = set(text_VPs.keys())
+  '''Returns a list of sentences from article2 that contain semantic concepts
+  very different from article1.'''
+  text_NPs = get_NPs(article1.body)
+  article1_NPs = set(text_NPs.keys())
+  text_VPs = get_VPs(article1.body)
+  article1_VPs = set(text_VPs.keys())
 
-    text_NPs = get_NPs(article2.body)
-    article2_NPs = set(text_NPs.keys())
-    diff_NPs = article2_NPs.difference(article1_NPs)
-    text_VPs = get_VPs(article2.body)
-    article2_VPs = set(text_VPs.keys())
-    diff_VPs = article2_VPs.difference(article1_VPs)
+  text_NPs = get_NPs(article2.body)
+  article2_NPs = set(text_NPs.keys())
+  diff_NPs = article2_NPs.difference(article1_NPs)
+  text_VPs = get_VPs(article2.body)
+  article2_VPs = set(text_VPs.keys())
+  diff_VPs = article2_VPs.difference(article1_VPs)
 
-    syns1 = []
-    for np in article1_NPs:
-      synset = get_synset(np)
-      if synset:
-        syns1.append(synset)
-        syns1.extend(get_ancestors(synset))
+  syns1 = []
+  for np in article1_NPs:
+    synset = get_synset(np)
+    if synset:
+      syns1.append(synset)
+      syns1.extend(get_ancestors(synset))
 
-    sentences = {}
-    for np in diff_NPs:
-      np = np.encode('utf-8')
-      synset = get_synset(np)
-      if synset:
-        distance = synset_distance(synset, syns1)
-        if distance > 3:
-          sentence = text_NPs[np][0].strip() + '.'
-          if sentence in sentences:
-            sentences[sentence] = sentences[sentence].replace(np, '**%s**' % np)
-          else:
-            sentences[sentence] = sentence.replace(np, '**%s**' % np)
+  sentences = {}
+  for np in diff_NPs:
+    np = np.encode('utf-8')
+    synset = get_synset(np)
+    if synset:
+      distance = synset_distance(synset, syns1)
+      if distance > 3:
+        sentence = text_NPs[np][0].strip() + '.'
+        if sentence in sentences:
+          sentences[sentence] = sentences[sentence].replace(np, '**%s**' % np)
+        else:
+          sentences[sentence] = sentence.replace(np, '**%s**' % np)
 
-    syns1 = []
-    for vp in article1_VPs:
-      syn = wn.synsets(vp, 'v')
-      if syn:
-        syn = syn[0]
-        syns1.append(syn)
-        syns1.extend(get_ancestors(syn))
+  syns1 = []
+  for vp in article1_VPs:
+    syn = wn.synsets(vp, 'v')
+    if syn:
+      syn = syn[0]
+      syns1.append(syn)
+      syns1.extend(get_ancestors(syn))
 
-    for verb in diff_VPs:
-      verb = verb.encode('utf-8')
-      syn = wn.synsets(verb, 'v')
-      if syn:
-        syn = syn[0]
-        distance = synset_distance(syn, syns1)
-        if distance > 5 and distance != float("inf"):
-          sentence = text_VPs[verb][0].encode('utf-8').strip() + '.'
-          if sentence in sentences:
-            sentences[sentence] = sentences[sentence].replace(verb, '**%s**' % verb)
-          else:
-            sentences[sentence] = sentence.replace(verb, '**%s**' % verb)
+  for verb in diff_VPs:
+    verb = verb.encode('utf-8')
+    syn = wn.synsets(verb, 'v')
+    if syn:
+      syn = syn[0]
+      distance = synset_distance(syn, syns1)
+      if distance > 5 and distance != float("inf"):
+        sentence = text_VPs[verb][0].encode('utf-8').strip() + '.'
+        if sentence in sentences:
+          sentences[sentence] = sentences[sentence].replace(verb, '**%s**' % verb)
+        else:
+          sentences[sentence] = sentence.replace(verb, '**%s**' % verb)
 
-    return sentences.values()
+  return sentences.values()
 
 def compare_to_all_articles(article, comparison_articles):
   '''Compares article to the comparison_articles.
