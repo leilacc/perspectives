@@ -54,7 +54,13 @@ class AlJazeera(news_interface.NewsOrg):
     body = ' '.join([helpers.decode(p.text) for p in article])
     #log.info(headline)
     #log.info(body)
-    return news_interface.Article(headline, body, url, news_orgs.ALJAZEERA)
+
+    try:
+      date = soup.find("time").string
+    except AttributeError:
+      date = soup.find("span", {"class": "date"}).string
+    return news_interface.Article(headline, body, url, news_orgs.ALJAZEERA,
+                                  date)
 
   def get_query_results(self, query):
     '''Implementation for keyword searches from Al Jazeera.

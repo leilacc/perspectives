@@ -21,6 +21,7 @@ class RussiaToday(news_interface.NewsOrg):
 
     Returns: The Article representing the article at that url.
     '''
+    log.info(url)
     html = helpers.get_content(url)
     if not html:
       return None
@@ -36,9 +37,10 @@ class RussiaToday(news_interface.NewsOrg):
                                       p == 'Tags' or
                                       p == 'Trends')])
 
-    log.info(headline)
-    log.info(body)
-    return news_interface.Article(headline, body, url, news_orgs.RUSSIA_TODAY)
+    date = helpers.decode(soup.find('span', attrs={'class': 'time'}).contents[0])
+
+    return news_interface.Article(headline, body, url, news_orgs.RUSSIA_TODAY,
+                                  date)
 
   def get_query_results(self, query):
     '''Implementation for getting an article from Russia Today.

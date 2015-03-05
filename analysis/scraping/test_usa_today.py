@@ -13,6 +13,10 @@ class TestUSAToday(unittest.TestCase):
     article = self.USAToday.get_article(url)
     self.assertTrue(isinstance(article, news_interface.Article),
         'Expected the result to be an Article instance')
+    self.assertEqual(article.headline,
+                     "Democrat organizes 'Charlie Hebdo' tribute at Obama "
+                     "speech")
+    self.assertEqual(article.date, '6:17 p.m. EST January 20, 2015')
 
   def test_get_article_travel(self):
     url = 'http://www.usatoday.com/story/travel/columnist/greatamericanbites/2015/01/22/dierks-bently-whiskey-row-scottsdale/22112457/'

@@ -22,6 +22,8 @@ class NYTimes(news_interface.NewsOrg):
 
     Returns: The Article representing the article at that url.
     '''
+    log.info(url)
+
     html = helpers.get_content(url)
     if not html:
       return None
@@ -41,9 +43,12 @@ class NYTimes(news_interface.NewsOrg):
     p_text = [helpers.decode(p.get_text()) for p in paragraphs]
     body = ' '.join([p for p in p_text])
 
-    log.info(headline)
-    log.info(body)
-    return news_interface.Article(headline, body, url, news_orgs.NY_TIMES)
+    try:
+      date = soup.find('h6', attrs={'class': 'dateline'}).string
+    except AttributeError:
+      date = soup.find('time', attrs={'class': 'dateline'}).string
+
+    return news_interface.Article(headline, body, url, news_orgs.NY_TIMES, date)
 
   def get_query_results(self, query):
     '''Implementation for getting an article from NYTimes.

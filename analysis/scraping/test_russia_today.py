@@ -13,6 +13,10 @@ class TestRussiaToday(unittest.TestCase):
     article = self.RussiaToday.get_article(url)
     self.assertTrue(isinstance(article, news_interface.Article),
         'Expected the result to be an Article instance')
+    self.assertEqual(article.headline,
+                     "ISIS urges new attacks on infidel West following "
+                     "Charlie Hebdo massacre")
+    self.assertEqual(article.date, 'Published time: January 27, 2015 13:16')
 
   def test_get_query_results(self):
     query = 'charlie+hebdo'

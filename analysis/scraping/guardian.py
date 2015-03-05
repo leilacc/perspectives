@@ -36,9 +36,11 @@ class Guardian(news_interface.NewsOrg):
     paragraphs = article.find_all('p', attrs={'class': None})
     body = ' '.join([p.get_text() for p in paragraphs])
 
+    date = helpers.decode(soup.find('time', attrs={'itemprop': 'datePublished'}).contents[0])
+
     log.info(headline)
     log.info(body)
-    return news_interface.Article(headline, body, url, news_orgs.GUARDIAN)
+    return news_interface.Article(headline, body, url, news_orgs.GUARDIAN, date)
 
   def get_query_results(self, query):
     '''Implementation for getting an article from the Guardian.

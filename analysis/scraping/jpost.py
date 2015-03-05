@@ -33,6 +33,8 @@ class JPost(news_interface.NewsOrg):
       headline = a.text.strip().strip('\r\n')
       paragraphs = soup.find("div", {"class": "article-text"})
       article = paragraphs.find("p")
+      date = soup.find('p', attrs={'class': 'article-date-time'}).string
+      date = helpers.decode(date)
     except Exception as e:
       log.error('Error scraping JPost article at %s: %s' % (url, e))
 
@@ -40,7 +42,7 @@ class JPost(news_interface.NewsOrg):
 
     log.info(headline)
     log.info(body)
-    return news_interface.Article(headline, body, url, news_orgs.JPOST)
+    return news_interface.Article(headline, body, url, news_orgs.JPOST, date)
 
   def get_query_results(self, query):
     '''Implementation for keyword searches from JPost.
@@ -61,3 +63,4 @@ class JPost(news_interface.NewsOrg):
     top_articles = []
     for url in article_urls[0:news_interface.NUM_ARTICLES]:
       top_articles.append(self.get_article(url))
+    return top_articles

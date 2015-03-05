@@ -15,6 +15,8 @@ class TestAlJazeera(unittest.TestCase):
     article = self.AlJazeera.get_article(url)
     self.assertTrue(isinstance(article, news_interface.Article),
         'Expected the result to be an Article instance')
+    self.assertEqual(article.headline, "Charlie Hebdo: 'Us or them'")
+    self.assertEqual(article.date, "11 Jan 2015 13:35 GMT")
 
   def test_get_query_results(self):
     query = 'charlie+hebdo'

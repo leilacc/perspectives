@@ -5,8 +5,10 @@ import requests
 from logger import log
 
 def decode(strr):
-  '''Decodes strings that were scraped from the web. Fixes spacing'''
+  '''Decodes strings that were scraped from the web. Fixes spacing and quotes'''
   strr = strr.strip().strip('\r\n').strip('\n')
+  strr = re.sub(u'\u2018', "'", strr)
+  strr = re.sub(u'\u2019', "'", strr)
   return strr
 
 def get_content(url):
@@ -15,7 +17,8 @@ def get_content(url):
     text = requests.get(url).text
     text = re.sub(r'&nbsp;', ' ', text)
     text = text.strip().strip('\r\n').strip('\n')
-    return text.encode('ascii', 'ignore')
+    text = text.encode('ascii', 'ignore')
+    return text
   except Exception as e:
     log.error('Error opening url %s: %s' % (url, e))
     return None

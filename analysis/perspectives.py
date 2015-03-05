@@ -1,13 +1,17 @@
 '''Get perspectives from different articles.'''
 
-from scraping import logger
+from Queue import Queue
 import re
+from threading import Thread
 
 import compare_articles
 import extract_keywords
 from scraping import aljazeera, bbc, cbc, cnn, globe_and_mail, guardian, \
                      huff_post, jpost, ny_post, ny_times, reuters, \
                      russia_today, times_of_israel, todays_zaman, usa_today
+from scraping import logger
+
+NUM_CONCURRENT = 200
 
 AL_JAZEERA = aljazeera.AlJazeera()
 BBC = bbc.BBC()
@@ -48,7 +52,7 @@ def get_perspectives(url):
   if article:
     article_topic = extract_keywords.extract_keywords(article.headline)
     related_articles = query_all_news_orgs(article_topic)
-    return compare_articles.compare.to_all_articles(article, related_articles)
+    return compare_articles.compare_to_all_articles(article, related_articles)
 
 def query_all_news_orgs(query):
   '''Get the top articles for the given query from all supported news orgs.

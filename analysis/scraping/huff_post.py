@@ -32,8 +32,10 @@ class HuffPost(news_interface.NewsOrg):
     article = soup.find('article', attrs={'class': 'entry'})
     paragraphs = article.find_all('p', attrs={'class': None})
     body = ' '.join([p.get_text() for p in paragraphs])
-    log.info(body)
-    return news_interface.Article(headline, body, url, news_orgs.HUFF_POST)
+    date = soup.find('span', attrs={'class': 'posted'}).find('time').string
+    date = helpers.decode(date)
+    return news_interface.Article(headline, body, url, news_orgs.HUFF_POST,
+                                  date)
 
   def get_query_results(self, query):
     '''Implementation for keyword searches from Huffington Post.

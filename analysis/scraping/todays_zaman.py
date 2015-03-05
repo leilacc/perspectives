@@ -24,6 +24,8 @@ class TodaysZaman(news_interface.NewsOrg):
     Returns:
       The Article representing the article at that url.
     '''
+    log.info(url)
+
     html = helpers.get_content(url)
     if not html:
       return None
@@ -34,9 +36,12 @@ class TodaysZaman(news_interface.NewsOrg):
     paragraphs = soup.find("div", {"id": "newsText"})
     article = paragraphs.findAll("p")
     body = ' '.join([helpers.decode(p.text) for p in article])
+    date = soup.find('div', attrs={'class': 'pageNewsDetailDate'}).contents[1].getText()
+    date = helpers.decode(date)
+
     log.info(headline)
-    log.info(body)
-    return news_interface.Article(headline, body, url, news_orgs.TODAYS_ZAMAN)
+    return news_interface.Article(headline, body, url, news_orgs.TODAYS_ZAMAN,
+                                  date)
 
   def get_query_results(self, query):
     '''Implementation for keyword searches from Todays Zaman.

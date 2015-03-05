@@ -37,11 +37,15 @@ class GlobeAndMail(news_interface.NewsOrg):
     [aside.extract() for aside in article.find_all('aside')]
 
     paragraphs = article.find_all('p', attrs={'class': None})
-    body = ' '.join([p.get_text().encode('ascii', 'ignore') for p in paragraphs])
+    body = ' '.join(
+        [p.get_text().encode('ascii', 'ignore') for p in paragraphs])
+
+    date = soup.find('time').string
 
     log.info(headline)
     log.info(body)
-    return news_interface.Article(headline, body, url, news_orgs.GLOBE_AND_MAIL)
+    return news_interface.Article(headline, body, url, news_orgs.GLOBE_AND_MAIL,
+                                  date)
 
   def get_query_results(self, query):
     '''Implementation for getting an article from the Globe and Mail.

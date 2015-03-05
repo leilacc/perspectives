@@ -21,6 +21,7 @@ class USAToday(news_interface.NewsOrg):
 
     Returns: The Article representing the article at that url.
     '''
+    log.info(url)
     html = helpers.get_content(url)
     if not html:
       return None
@@ -30,7 +31,9 @@ class USAToday(news_interface.NewsOrg):
     headline = helpers.decode(article.h1.string)
     paragraphs = article.find_all('p', attrs={'class': None})
     body = ' '.join([helpers.decode(p.get_text()) for p in paragraphs])
-    return news_interface.Article(headline, body, url, news_orgs.USA_TODAY)
+    date = soup.find('span', attrs={'class': 'asset-metabar-time'}).contents[0]
+    return news_interface.Article(headline, body, url, news_orgs.USA_TODAY,
+                                  date)
 
   def get_query_results(self, query):
     '''Implementation for keyword searches from USA Today.

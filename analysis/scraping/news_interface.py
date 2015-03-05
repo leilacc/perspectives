@@ -29,18 +29,20 @@ class NewsOrg:
 class Article:
   '''Represents an article.'''
 
-  def __init__(self, headline, body, link, news_org):
+  def __init__(self, headline, body, link, news_org, date):
     '''Initialize the article's properties.
 
     headline: str
     body: str
     link: str
     news_org: int. See the macros in api_keys
+    date: str, unaltered from scraping
     '''
     self.headline = headline
     self.body = body
     self.link = link
     self.news_org = news_org
+    self.date = date
 
   def to_dict(self):
     '''Return the Article represented in dictionary form.
@@ -54,5 +56,6 @@ class Article:
     article_dict["body"] = self.body
     article_dict["link"] = self.link
     article_dict["news_org"] = self.news_org
+    article_dict["date"] = self.date
     return article_dict
 

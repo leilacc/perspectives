@@ -15,6 +15,9 @@ class TestBBC(unittest.TestCase):
     article = self.BBC.get_article(url)
     self.assertTrue(isinstance(article, news_interface.Article),
         'Expected the result to be an Article instance')
+    self.assertEqual(article.headline,
+                     'Charlie Hebdo attack: Print run for new issue expanded')
+    self.assertEqual(article.date, '14 January 2015')
 
   def test_get_query_results(self):
     query = 'charlie+hebdo'

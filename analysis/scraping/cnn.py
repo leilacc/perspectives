@@ -29,8 +29,7 @@ class CNN(news_interface.NewsOrg):
     soup = BeautifulSoup(html)
     a = soup.find("title")
     k = a.text.split("-")
-    headline = k[0]
-    date = k[1]
+    headline = helpers.decode(k[0])
     c = soup.findAll("p", attrs={'class': 'zn-body__paragraph'})
     body = ""
     for paragraph in c:
@@ -40,7 +39,13 @@ class CNN(news_interface.NewsOrg):
             pass
     log.info(headline)
     log.info(body)
-    return news_interface.Article(headline, body, url, news_orgs.CNN)
+
+    try:
+      date = soup.find('p', attrs={'class': 'update-time'}).string
+    except AttributeError:
+      date = soup.find('p', attrs={'class': 'metadata__data-added'}).string
+      
+    return news_interface.Article(headline, body, url, news_orgs.CNN, date)
 
   def get_query_results(self, query):
     '''Implementation for keyword searches from CNN.
@@ -65,5 +70,6 @@ class CNN(news_interface.NewsOrg):
 
     top_articles = []
     for url in article_urls[0:news_interface.NUM_ARTICLES]:
+      log.info(url)
       top_articles.append(self.get_article(url))
     return top_articles

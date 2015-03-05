@@ -22,20 +22,21 @@ class TimesOfIsrael(news_interface.NewsOrg):
     Returns:
       The Article representing the article at that url.
     '''
+    log.info(url)
+
     html = helpers.get_content(url)
     if not html:
       return None
 
     soup = BeautifulSoup(html)
-
     h1 = soup.find('h1', attrs={'class': 'headline'})
     headline = helpers.decode(h1.text)
     paragraphs = soup.findAll("p", {"itemprop": "articleBody"})
     body = ' '.join([helpers.decode(p.text) for p in paragraphs])
+    date = helpers.decode(soup.find('span', attrs={'class': 'date'}).getText())
 
-    log.info(headline)
-    log.info(body)
-    return news_interface.Article(headline, body, url, news_orgs.TIMES_OF_ISRAEL)
+    return news_interface.Article(headline, body, url,
+                                  news_orgs.TIMES_OF_ISRAEL, date)
 
   def get_query_results(self, query):
     '''Implementation for keyword searches from Times of Israel.

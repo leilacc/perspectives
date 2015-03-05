@@ -15,6 +15,10 @@ class TestGlobeAndMail(unittest.TestCase):
     article = self.GlobeAndMail.get_article(url)
     self.assertTrue(isinstance(article, news_interface.Article),
         'Expected the result to be an Article instance')
+    self.assertEqual(article.headline,
+                     'Grade 6 student killed by U.S. drone strike in Yemen, '
+                     'rights group says')
+    self.assertEqual(article.date, 'Tuesday, Jan. 27 2015, 9:42 AM EST')
 
   def test_get_query_results(self):
     query = 'charlie+hebdo'

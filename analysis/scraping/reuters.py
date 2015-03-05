@@ -19,6 +19,7 @@ class Reuters(news_interface.NewsOrg):
 
     Returns: The Article representing the article at that url.
     '''
+    log.info(url)
     html = helpers.get_content(url)
     if not html:
       return None
@@ -26,11 +27,12 @@ class Reuters(news_interface.NewsOrg):
     soup = BeautifulSoup(html)
     headline_div = soup.find('div', attrs={'class': 'column1 gridPanel grid8'})
     headline = helpers.decode(headline_div.h1.string)
-    paragraphs = soup.find('div', attrs={'class': 'column1 gridPanel grid8'}).findAll("p")
-    body = ' '.join([helpers.decode(p.text) for p in paragraphs])
-    log.info(headline)
-    log.info(body)
-    return news_interface.Article(headline, body, url, news_orgs.REUTERS)
+    body = soup.find('span', attrs={'id': 'articleText'}).getText()
+    body = helpers.decode(body)
+
+    date = soup.find('span', attrs={'class': 'timestamp'}).string
+
+    return news_interface.Article(headline, body, url, news_orgs.REUTERS, date)
 
   def get_query_results(self, query):
     '''Implementation for keyword searches from REUTERS.

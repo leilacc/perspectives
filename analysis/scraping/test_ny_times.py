@@ -13,6 +13,10 @@ class TestNYTimes(unittest.TestCase):
     article = self.NYTimes.get_article(url)
     self.assertTrue(isinstance(article, news_interface.Article),
         'Expected the result to be an Article instance')
+    self.assertEqual(article.headline,
+                     "MEDIA DECODER; A Provocative Newspaper Is Attacked in "
+                     "France, And Support Is Swift")
+    self.assertEqual(article.date, 'Published: November 7, 2011')
 
   def test_get_query_results(self):
     query = 'charlie+hebdo'

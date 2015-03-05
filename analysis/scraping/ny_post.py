@@ -38,9 +38,10 @@ class NYPost(news_interface.NewsOrg):
     paragraphs = article.find_all('p', attrs={'class': None})
     body = ' '.join(
         [helpers.decode(p.get_text()) for p in paragraphs])
-    log.info(headline)
-    log.info(body)
-    return news_interface.Article(headline, body, url, news_orgs.NY_POST)
+    date = soup.find('p', attrs={'class': 'byline-date'}).string
+
+    log.info(url)
+    return news_interface.Article(headline, body, url, news_orgs.NY_POST, date)
 
   def get_query_results(self, query):
     '''Implementation for getting an article from the New York Post.

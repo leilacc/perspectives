@@ -41,7 +41,9 @@ class CBC(news_interface.NewsOrg):
     body = ' '.join([p.get_text() for p in paragraphs])
     log.info(headline)
     log.info(body)
-    return news_interface.Article(headline, body, url, news_orgs.CBC)
+
+    date = soup.find('span', attrs={'class': 'delimited'}).string
+    return news_interface.Article(headline, body, url, news_orgs.CBC, date)
 
   def get_query_results(self, query):
     '''Implementation for getting an article from the CBC.
