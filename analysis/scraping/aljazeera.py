@@ -24,43 +24,44 @@ class AlJazeera(news_interface.NewsOrg):
       The Article representing the article at that url, or None if unable to
       get the Article.
     '''
-    html = helpers.get_content(url)
-    if not html:
-      return None
+    try:
+      html = helpers.get_content(url)
+      if not html:
+        return None
 
-    soup = BeautifulSoup(html)
+      soup = BeautifulSoup(html)
 
-    headline = None
-    potential_classes = ["heading-story", "articleOpinion-title"]
-    for h1_class in potential_classes:
+      headline = None
+      potential_classes = ["heading-story", "articleOpinion-title"]
+      for h1_class in potential_classes:
+        try:
+          headline = soup.find("h1", {"class": h1_class}).string
+          break
+        except AttributeError:
+          continue
+      if not headline:
+        log.error('Exception trying to scrape Al Jazeera headline from %s'
+                  % (url))
+        return None
+
+      headline = helpers.decode(headline)
+
       try:
-        headline = soup.find("h1", {"class": h1_class}).string
-        break
+        paragraphs = soup.find("div", {"class": "article-body"})
+        article = paragraphs.findAll("p")
       except AttributeError:
-        continue
-    if not headline:
-      log.error('Exception trying to scrape Al Jazeera headline from %s'
-                % (url))
-      return None
+        paragraphs = soup.find("div", {"class": "text"})
+        article = paragraphs.findAll("p")
+      body = ' '.join([helpers.decode(p.text) for p in article])
 
-    headline = helpers.decode(headline)
-
-    try:
-      paragraphs = soup.find("div", {"class": "article-body"})
-      article = paragraphs.findAll("p")
-    except AttributeError:
-      paragraphs = soup.find("div", {"class": "text"})
-      article = paragraphs.findAll("p")
-    body = ' '.join([helpers.decode(p.text) for p in article])
-    #log.info(headline)
-    #log.info(body)
-
-    try:
-      date = soup.find("time").string
-    except AttributeError:
-      date = soup.find("span", {"class": "date"}).string
-    return news_interface.Article(headline, body, url, news_orgs.ALJAZEERA,
-                                  date)
+      try:
+        date = soup.find("time").string
+      except AttributeError:
+        date = soup.find("span", {"class": "date"}).string
+      return news_interface.Article(headline, body, url, news_orgs.ALJAZEERA,
+                                    date)
+    except Exception as e:
+      log.info("Hit exception getting article for %s: %s" % (url, e))
 
   def get_query_results(self, query):
     '''Implementation for keyword searches from Al Jazeera.

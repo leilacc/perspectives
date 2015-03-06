@@ -28,20 +28,24 @@ class NYPost(news_interface.NewsOrg):
 
     Returns: The Article representing the article at that url.
     '''
-    html = helpers.get_content(url)
-    if not html:
-      return None
+    try:
+      html = helpers.get_content(url)
+      if not html:
+        return None
 
-    soup = BeautifulSoup(html)
-    headline = helpers.decode(soup.h1.a.string)
-    article = soup.find('div', attrs={'class': 'entry-content'})
-    paragraphs = article.find_all('p', attrs={'class': None})
-    body = ' '.join(
-        [helpers.decode(p.get_text()) for p in paragraphs])
-    date = soup.find('p', attrs={'class': 'byline-date'}).string
+      soup = BeautifulSoup(html)
+      headline = helpers.decode(soup.h1.a.string)
+      article = soup.find('div', attrs={'class': 'entry-content'})
+      paragraphs = article.find_all('p', attrs={'class': None})
+      body = ' '.join(
+          [helpers.decode(p.get_text()) for p in paragraphs])
+      date = soup.find('p', attrs={'class': 'byline-date'}).string
 
-    log.info(url)
-    return news_interface.Article(headline, body, url, news_orgs.NY_POST, date)
+      log.info(url)
+      return news_interface.Article(headline, body, url, news_orgs.NY_POST,
+                                    date)
+    except Exception as e:
+      log.info("Hit exception getting article for %s: %s" % (url, e))
 
   def get_query_results(self, query):
     '''Implementation for getting an article from the New York Post.

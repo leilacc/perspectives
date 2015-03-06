@@ -19,20 +19,24 @@ class Reuters(news_interface.NewsOrg):
 
     Returns: The Article representing the article at that url.
     '''
-    log.info(url)
-    html = helpers.get_content(url)
-    if not html:
-      return None
+    try:
+      html = helpers.get_content(url)
+      if not html:
+        return None
 
-    soup = BeautifulSoup(html)
-    headline_div = soup.find('div', attrs={'class': 'column1 gridPanel grid8'})
-    headline = helpers.decode(headline_div.h1.string)
-    body = soup.find('span', attrs={'id': 'articleText'}).getText()
-    body = helpers.decode(body)
+      soup = BeautifulSoup(html)
+      headline_div = soup.find('div',
+                               attrs={'class': 'column1 gridPanel grid8'})
+      headline = helpers.decode(headline_div.h1.string)
+      body = soup.find('span', attrs={'id': 'articleText'}).getText()
+      body = helpers.decode(body)
 
-    date = soup.find('span', attrs={'class': 'timestamp'}).string
+      date = soup.find('span', attrs={'class': 'timestamp'}).string
 
-    return news_interface.Article(headline, body, url, news_orgs.REUTERS, date)
+      return news_interface.Article(headline, body, url, news_orgs.REUTERS,
+                                    date)
+    except Exception as e:
+      log.info("Hit exception getting article for %s: %s" % (url, e))
 
   def get_query_results(self, query):
     '''Implementation for keyword searches from REUTERS.

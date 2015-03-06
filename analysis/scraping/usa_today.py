@@ -21,19 +21,22 @@ class USAToday(news_interface.NewsOrg):
 
     Returns: The Article representing the article at that url.
     '''
-    log.info(url)
-    html = helpers.get_content(url)
-    if not html:
-      return None
+    try:
+      html = helpers.get_content(url)
+      if not html:
+        return None
 
-    soup = BeautifulSoup(html)
-    article = soup.article
-    headline = helpers.decode(article.h1.string)
-    paragraphs = article.find_all('p', attrs={'class': None})
-    body = ' '.join([helpers.decode(p.get_text()) for p in paragraphs])
-    date = soup.find('span', attrs={'class': 'asset-metabar-time'}).contents[0]
-    return news_interface.Article(headline, body, url, news_orgs.USA_TODAY,
-                                  date)
+      soup = BeautifulSoup(html)
+      article = soup.article
+      headline = helpers.decode(article.h1.string)
+      paragraphs = article.find_all('p', attrs={'class': None})
+      body = ' '.join([helpers.decode(p.get_text()) for p in paragraphs])
+      time_span = soup.find('span', attrs={'class': 'asset-metabar-time'})
+      date = time_span.contents[0]
+      return news_interface.Article(headline, body, url, news_orgs.USA_TODAY,
+                                    date)
+    except Exception as e:
+      log.info("Hit exception getting article for %s: %s" % (url, e))
 
   def get_query_results(self, query):
     '''Implementation for keyword searches from USA Today.

@@ -22,30 +22,33 @@ class GlobeAndMail(news_interface.NewsOrg):
 
     Returns: The Article representing the article at that url.
     '''
-    html = helpers.get_content(url)
-    if not html:
-      return None
+    try:
+      html = helpers.get_content(url)
+      if not html:
+        return None
 
-    soup = BeautifulSoup(html)
+      soup = BeautifulSoup(html)
 
-    soup.h1.a.extract()
-    headline = soup.h1.get_text().encode('ascii', 'ignore').strip('\n')
-    article = soup.find('div', attrs={'class': 'entry-content'})
+      soup.h1.a.extract()
+      headline = soup.h1.get_text().encode('ascii', 'ignore').strip('\n')
+      article = soup.find('div', attrs={'class': 'entry-content'})
 
-    # Remove other content that is inline with the article text
-    [div.extract() for div in article.find_all('div', attrs={'class': 'entry-related'})]
-    [aside.extract() for aside in article.find_all('aside')]
+      # Remove other content that is inline with the article text
+      [div.extract() for div in
+          article.find_all('div', attrs={'class': 'entry-related'})]
+      [aside.extract() for aside in article.find_all('aside')]
 
-    paragraphs = article.find_all('p', attrs={'class': None})
-    body = ' '.join(
-        [p.get_text().encode('ascii', 'ignore') for p in paragraphs])
+      paragraphs = article.find_all('p', attrs={'class': None})
+      body = ' '.join(
+          [p.get_text().encode('ascii', 'ignore') for p in paragraphs])
 
-    date = soup.find('time').string
+      date = soup.find('time').string
 
-    log.info(headline)
-    log.info(body)
-    return news_interface.Article(headline, body, url, news_orgs.GLOBE_AND_MAIL,
-                                  date)
+      log.info(headline)
+      return news_interface.Article(headline, body, url,
+                                    news_orgs.GLOBE_AND_MAIL, date)
+    except Exception as e:
+      log.info("Hit exception getting article for %s: %s" % (url, e))
 
   def get_query_results(self, query):
     '''Implementation for getting an article from the Globe and Mail.

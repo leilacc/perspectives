@@ -23,27 +23,29 @@ class CBC(news_interface.NewsOrg):
     Returns: The Article representing the article at that url, or None if
     unable to scrape the article.
     '''
-    html = helpers.get_content(url)
-    if not html:
-      return None
-
-    soup = BeautifulSoup(html)
-
     try:
-      headline = soup.h1.string
-    except AttributeError:
-      log.error('Exception trying to scrape CBC headline from %s'
-                % (url))
-      return None
+      html = helpers.get_content(url)
+      if not html:
+        return None
 
-    article = soup.find('div', attrs={'class': 'story-content'})
-    paragraphs = article.find_all('p', attrs={'class': None})
-    body = ' '.join([p.get_text() for p in paragraphs])
-    log.info(headline)
-    log.info(body)
+      soup = BeautifulSoup(html)
 
-    date = soup.find('span', attrs={'class': 'delimited'}).string
-    return news_interface.Article(headline, body, url, news_orgs.CBC, date)
+      try:
+        headline = soup.h1.string
+      except AttributeError:
+        log.error('Exception trying to scrape CBC headline from %s'
+                  % (url))
+        return None
+
+      article = soup.find('div', attrs={'class': 'story-content'})
+      paragraphs = article.find_all('p', attrs={'class': None})
+      body = ' '.join([p.get_text() for p in paragraphs])
+      log.info(headline)
+
+      date = soup.find('span', attrs={'class': 'delimited'}).string
+      return news_interface.Article(headline, body, url, news_orgs.CBC, date)
+    except Exception as e:
+      log.info("Hit exception getting article for %s: %s" % (url, e))
 
   def get_query_results(self, query):
     '''Implementation for getting an article from the CBC.

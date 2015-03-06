@@ -22,30 +22,32 @@ class CNN(news_interface.NewsOrg):
     Returns:
       The Article representing the article at that url.
     '''
-    html = helpers.get_content(url)
-    if not html:
-      return None
-
-    soup = BeautifulSoup(html)
-    a = soup.find("title")
-    k = a.text.split("-")
-    headline = helpers.decode(k[0])
-    c = soup.findAll("p", attrs={'class': 'zn-body__paragraph'})
-    body = ""
-    for paragraph in c:
-        try:
-            body += paragraph.text.decode("utf-8").replace("\"","'") + " "
-        except UnicodeEncodeError:
-            pass
-    log.info(headline)
-    log.info(body)
-
     try:
-      date = soup.find('p', attrs={'class': 'update-time'}).string
-    except AttributeError:
-      date = soup.find('p', attrs={'class': 'metadata__data-added'}).string
-      
-    return news_interface.Article(headline, body, url, news_orgs.CNN, date)
+      html = helpers.get_content(url)
+      if not html:
+        return None
+
+      soup = BeautifulSoup(html)
+      a = soup.find("title")
+      k = a.text.split("-")
+      headline = helpers.decode(k[0])
+      c = soup.findAll("p", attrs={'class': 'zn-body__paragraph'})
+      body = ""
+      for paragraph in c:
+          try:
+              body += paragraph.text.decode("utf-8").replace("\"","'") + " "
+          except UnicodeEncodeError:
+              pass
+      log.info(headline)
+
+      try:
+        date = soup.find('p', attrs={'class': 'update-time'}).string
+      except AttributeError:
+        date = soup.find('p', attrs={'class': 'metadata__data-added'}).string
+
+      return news_interface.Article(headline, body, url, news_orgs.CNN, date)
+    except Exception as e:
+      log.info("Hit exception getting article for %s: %s" % (url, e))
 
   def get_query_results(self, query):
     '''Implementation for keyword searches from CNN.

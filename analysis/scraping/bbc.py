@@ -21,19 +21,21 @@ class BBC(news_interface.NewsOrg):
 
     Returns: The Article representing the article at that url.
     '''
-    html = helpers.get_content(url)
-    if not html:
-      return None
+    try:
+      html = helpers.get_content(url)
+      if not html:
+        return None
 
-    soup = BeautifulSoup(html)
-    headline = soup.h1.string
-    article = soup.find('div', attrs={'class': 'story-body'})
-    paragraphs = article.find_all('p', attrs={'class': None})
-    body = ' '.join([p.get_text() for p in paragraphs])
-    log.info(headline)
-    log.info(body)
-    date = soup.find ('span', attrs={'class': 'date'}).string
-    return news_interface.Article(headline, body, url, news_orgs.BBC, date)
+      soup = BeautifulSoup(html)
+      headline = soup.h1.string
+      article = soup.find('div', attrs={'class': 'story-body'})
+      paragraphs = article.find_all('p', attrs={'class': None})
+      body = ' '.join([p.get_text() for p in paragraphs])
+      log.info(headline)
+      date = soup.find ('span', attrs={'class': 'date'}).string
+      return news_interface.Article(headline, body, url, news_orgs.BBC, date)
+    except Exception as e:
+      log.info("Hit exception getting article for %s: %s" % (url, e))
 
   def get_query_results(self, query):
     '''Implementation for keyword searches from BBC.

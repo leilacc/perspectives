@@ -23,19 +23,22 @@ class HuffPost(news_interface.NewsOrg):
     Returns:
       The Article representing the article at that url.
     '''
-    html = helpers.get_content(url)
-    if not html:
-      return None
+    try:
+      html = helpers.get_content(url)
+      if not html:
+        return None
 
-    soup = BeautifulSoup(html)
-    headline = soup.h1.string
-    article = soup.find('article', attrs={'class': 'entry'})
-    paragraphs = article.find_all('p', attrs={'class': None})
-    body = ' '.join([p.get_text() for p in paragraphs])
-    date = soup.find('span', attrs={'class': 'posted'}).find('time').string
-    date = helpers.decode(date)
-    return news_interface.Article(headline, body, url, news_orgs.HUFF_POST,
-                                  date)
+      soup = BeautifulSoup(html)
+      headline = soup.h1.string
+      article = soup.find('article', attrs={'class': 'entry'})
+      paragraphs = article.find_all('p', attrs={'class': None})
+      body = ' '.join([p.get_text() for p in paragraphs])
+      date = soup.find('span', attrs={'class': 'posted'}).find('time').string
+      date = helpers.decode(date)
+      return news_interface.Article(headline, body, url, news_orgs.HUFF_POST,
+                                    date)
+    except Exception as e:
+      log.info("Hit exception getting article for %s: %s" % (url, e))
 
   def get_query_results(self, query):
     '''Implementation for keyword searches from Huffington Post.

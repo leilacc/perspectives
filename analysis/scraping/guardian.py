@@ -22,25 +22,28 @@ class Guardian(news_interface.NewsOrg):
 
     Returns: The Article representing the article at that url.
     '''
-    html = helpers.get_content(url)
-    if not html:
-      return None
+    try:
+      html = helpers.get_content(url)
+      if not html:
+        return None
 
-    soup = BeautifulSoup(html)
-    headline = soup.h1.string.strip('\n')
+      soup = BeautifulSoup(html)
+      headline = soup.h1.string.strip('\n')
 
-    if url.split('.com/')[1].startswith('theguardian'):
-      article = soup.find('div', attrs={'class': 'flexible-content-body'})
-    else:
-      article = soup.find('div', attrs={'class': 'content__article-body'})
-    paragraphs = article.find_all('p', attrs={'class': None})
-    body = ' '.join([p.get_text() for p in paragraphs])
+      if url.split('.com/')[1].startswith('theguardian'):
+        article = soup.find('div', attrs={'class': 'flexible-content-body'})
+      else:
+        article = soup.find('div', attrs={'class': 'content__article-body'})
+      paragraphs = article.find_all('p', attrs={'class': None})
+      body = ' '.join([p.get_text() for p in paragraphs])
 
-    date = helpers.decode(soup.find('time', attrs={'itemprop': 'datePublished'}).contents[0])
+      date = helpers.decode(soup.find('time', attrs={'itemprop': 'datePublished'}).contents[0])
 
-    log.info(headline)
-    log.info(body)
-    return news_interface.Article(headline, body, url, news_orgs.GUARDIAN, date)
+      log.info(headline)
+      return news_interface.Article(headline, body, url, news_orgs.GUARDIAN,
+                                    date)
+    except Exception as e:
+      log.info("Hit exception getting article for %s: %s" % (url, e))
 
   def get_query_results(self, query):
     '''Implementation for getting an article from the Guardian.

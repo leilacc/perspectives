@@ -22,33 +22,35 @@ class NYTimes(news_interface.NewsOrg):
 
     Returns: The Article representing the article at that url.
     '''
-    log.info(url)
-
-    html = helpers.get_content(url)
-    if not html:
-      return None
-
-    soup = BeautifulSoup(html)
-    headline = helpers.decode(soup.h1.string)
-
     try:
-      article = soup.find('div', attrs={'class': 'articleBody'})
-      paragraphs = article.find_all('p', attrs={'itemprop': 'articleBody'})
-    except AttributeError:
-      # this article's html uses different attributes... sigh...
-      # Hopefully there are only 2 versions
-      article = soup.find('div', attrs={'class': 'story-body'})
-      paragraphs = article.find_all('p', attrs={'class': 'story-content'})
+      html = helpers.get_content(url)
+      if not html:
+        return None
 
-    p_text = [helpers.decode(p.get_text()) for p in paragraphs]
-    body = ' '.join([p for p in p_text])
+      soup = BeautifulSoup(html)
+      headline = helpers.decode(soup.h1.string)
 
-    try:
-      date = soup.find('h6', attrs={'class': 'dateline'}).string
-    except AttributeError:
-      date = soup.find('time', attrs={'class': 'dateline'}).string
+      try:
+        article = soup.find('div', attrs={'class': 'articleBody'})
+        paragraphs = article.find_all('p', attrs={'itemprop': 'articleBody'})
+      except AttributeError:
+        # this article's html uses different attributes... sigh...
+        # Hopefully there are only 2 versions
+        article = soup.find('div', attrs={'class': 'story-body'})
+        paragraphs = article.find_all('p', attrs={'class': 'story-content'})
 
-    return news_interface.Article(headline, body, url, news_orgs.NY_TIMES, date)
+      p_text = [helpers.decode(p.get_text()) for p in paragraphs]
+      body = ' '.join([p for p in p_text])
+
+      try:
+        date = soup.find('h6', attrs={'class': 'dateline'}).string
+      except AttributeError:
+        date = soup.find('time', attrs={'class': 'dateline'}).string
+
+      return news_interface.Article(headline, body, url, news_orgs.NY_TIMES,
+                                    date)
+    except Exception as e:
+      log.info("Hit exception getting article for %s: %s" % (url, e))
 
   def get_query_results(self, query):
     '''Implementation for getting an article from NYTimes.

@@ -24,24 +24,26 @@ class TodaysZaman(news_interface.NewsOrg):
     Returns:
       The Article representing the article at that url.
     '''
-    log.info(url)
+    try:
+      html = helpers.get_content(url)
+      if not html:
+        return None
 
-    html = helpers.get_content(url)
-    if not html:
-      return None
+      soup = BeautifulSoup(html)
+      a = soup.find("title")
+      headline = helpers.decode(a.text)
+      paragraphs = soup.find("div", {"id": "newsText"})
+      article = paragraphs.findAll("p")
+      body = ' '.join([helpers.decode(p.text) for p in article])
+      dateDiv = soup.find('div', attrs={'class': 'pageNewsDetailDate'})
+      date = dateDiv.contents[1].getText()
+      date = helpers.decode(date)
 
-    soup = BeautifulSoup(html)
-    a = soup.find("title")
-    headline = helpers.decode(a.text)
-    paragraphs = soup.find("div", {"id": "newsText"})
-    article = paragraphs.findAll("p")
-    body = ' '.join([helpers.decode(p.text) for p in article])
-    date = soup.find('div', attrs={'class': 'pageNewsDetailDate'}).contents[1].getText()
-    date = helpers.decode(date)
-
-    log.info(headline)
-    return news_interface.Article(headline, body, url, news_orgs.TODAYS_ZAMAN,
-                                  date)
+      log.info(headline)
+      return news_interface.Article(headline, body, url, news_orgs.TODAYS_ZAMAN,
+                                    date)
+    except Exception as e:
+      log.info("Hit exception getting article for %s: %s" % (url, e))
 
   def get_query_results(self, query):
     '''Implementation for keyword searches from Todays Zaman.
