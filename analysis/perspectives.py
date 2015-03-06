@@ -52,7 +52,7 @@ def get_perspectives(url):
   if article:
     article_topic = extract_keywords.extract_keywords(article.headline)
     related_articles = query_all_news_orgs(article_topic)
-    return compare_articles.compare_to_all_articles(article, related_articles)
+    return compare_articles.compare_to_all_articles(article.body, related_articles)
 
 def query_all_news_orgs(query):
   '''Get the top articles for the given query from all supported news orgs.
@@ -82,39 +82,35 @@ def url_to_article(url):
     The Article that is scraped from url, if the url corresponds to an article
     on a supported news org page. Otherwise, None.
   '''
-  try:
-    if re.search(r'.*aljazeera\.com/((opinions)|(articles)|(news))/.+', url):
-      return AL_JAZEERA.get_article(url)
-    elif re.search(r'.*bbc\..+', url):
-      return BBC.get_article(url)
-    elif re.search(r'.*cbc\.ca/news/.+', url):
-      return CBC.get_article(url)
-    elif re.search(r'.*cnn\.com/.+', url):
-      return CNN.get_article(url)
-    elif re.search(r'.*theglobeandmail\.com/.+', url):
-      return GLOBE_AND_MAIL.get_article(url)
-    elif re.search(r'.*theguardian\.com/.+', url):
-      return GUARDIAN.get_article(url)
-    elif re.search(r'.*huffingtonpost\.c.+/.+', url):
-      return HUFF_POST.get_article(url)
-    elif re.search(r'.*jpost\.com/.+', url):
-      return JPOST.get_article(url)
-    elif re.search(r'.*nypost\.com/.+', url):
-      return NY_POST.get_article(url)
-    elif re.search(r'.*nytimes\.com/.+', url):
-      return NY_TIMES.get_article(url)
-    elif re.search(r'.*reuters\.com/.+', url):
-      return REUTERS.get_article(url)
-    elif re.search(r'.*rt\.com/.+', url):
-      return RT.get_article(url)
-    elif re.search(r'.*timesofisrael\.com/.+', url):
-      return TIMES_OF_ISRAEL.get_article(url)
-    elif re.search(r'.*todayszaman\.com/.+', url):
-      return TODAYS_ZAMAN.get_article(url)
-    elif re.search(r'.*usatoday\.com/story/.+', url):
-      return USA_TODAY.get_article(url)
-    else:
-      logger.log.info("Didn't regexp match for %s" % url)
-  except Exception as e:
-    logger.log.info("Hit exception getting article for %s: %s" % (url, e))
-    return None
+  if re.search(r'.*aljazeera\.com/((opinions)|(articles)|(news))/.+', url):
+    return AL_JAZEERA.get_article(url)
+  elif re.search(r'.*bbc\..+', url):
+    return BBC.get_article(url)
+  elif re.search(r'.*cbc\.ca/news/.+', url):
+    return CBC.get_article(url)
+  elif re.search(r'.*cnn\.com/.+', url):
+    return CNN.get_article(url)
+  elif re.search(r'.*theglobeandmail\.com/.+', url):
+    return GLOBE_AND_MAIL.get_article(url)
+  elif re.search(r'.*theguardian\.com/.+', url):
+    return GUARDIAN.get_article(url)
+  elif re.search(r'.*huffingtonpost\.c.+/.+', url):
+    return HUFF_POST.get_article(url)
+  elif re.search(r'.*jpost\.com/.+', url):
+    return JPOST.get_article(url)
+  elif re.search(r'.*nypost\.com/.+', url):
+    return NY_POST.get_article(url)
+  elif re.search(r'.*nytimes\.com/.+', url):
+    return NY_TIMES.get_article(url)
+  elif re.search(r'.*reuters\.com/.+', url):
+    return REUTERS.get_article(url)
+  elif re.search(r'.*rt\.com/.+', url):
+    return RT.get_article(url)
+  elif re.search(r'.*timesofisrael\.com/.+', url):
+    return TIMES_OF_ISRAEL.get_article(url)
+  elif re.search(r'.*todayszaman\.com/.+', url):
+    return TODAYS_ZAMAN.get_article(url)
+  elif re.search(r'.*usatoday\.com/story/.+', url):
+    return USA_TODAY.get_article(url)
+  else:
+    logger.log.info("Didn't regexp match for %s" % url)
