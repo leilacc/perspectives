@@ -79,7 +79,6 @@ class AlJazeera(news_interface.NewsOrg):
     article_urls = [result['url'] for result in json_res]
     top_articles = []
     for url in article_urls:
-      log.info(url)
       if 'topics' not in url and 'blogs' not in url: # not an article page
         top_articles.append(self.get_article(url))
     return top_articles[0:news_interface.NUM_ARTICLES]

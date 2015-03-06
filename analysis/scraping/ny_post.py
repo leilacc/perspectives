@@ -41,7 +41,6 @@ class NYPost(news_interface.NewsOrg):
           [helpers.decode(p.get_text()) for p in paragraphs])
       date = soup.find('p', attrs={'class': 'byline-date'}).string
 
-      log.info(url)
       return news_interface.Article(headline, body, url, news_orgs.NY_POST,
                                     date)
     except Exception as e:

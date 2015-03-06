@@ -38,7 +38,6 @@ class CNN(news_interface.NewsOrg):
               body += paragraph.text.decode("utf-8").replace("\"","'") + " "
           except UnicodeEncodeError:
               pass
-      log.info(headline)
 
       try:
         date = soup.find('p', attrs={'class': 'update-time'}).string
@@ -72,6 +71,5 @@ class CNN(news_interface.NewsOrg):
 
     top_articles = []
     for url in article_urls[0:news_interface.NUM_ARTICLES]:
-      log.info(url)
       top_articles.append(self.get_article(url))
     return top_articles

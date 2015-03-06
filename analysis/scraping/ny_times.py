@@ -68,6 +68,5 @@ class NYTimes(news_interface.NewsOrg):
 
     top_articles = []
     for url in article_urls[0:news_interface.NUM_ARTICLES]:
-      log.info(url)
       top_articles.append(self.get_article(url))
     return top_articles
