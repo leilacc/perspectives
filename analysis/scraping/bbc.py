@@ -27,12 +27,11 @@ class BBC(news_interface.NewsOrg):
         return None
 
       soup = BeautifulSoup(html)
-      headline = soup.h1.string
+      headline = helpers.decode(soup.h1.string)
       article = soup.find('div', attrs={'class': 'story-body'})
       paragraphs = article.find_all('p', attrs={'class': None})
-      body = ' '.join([p.get_text() for p in paragraphs])
-      log.info(headline)
-      date = soup.find ('span', attrs={'class': 'date'}).string
+      body = helpers.decode(' '.join([p.get_text() for p in paragraphs]))
+      date = helpers.decode(soup.find('span', attrs={'class': 'date'}).string)
       return news_interface.Article(headline, body, url, news_orgs.BBC, date)
     except Exception as e:
       log.info("Hit exception getting article for %s: %s" % (url, e))

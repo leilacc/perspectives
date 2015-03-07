@@ -35,13 +35,14 @@ class JPost(news_interface.NewsOrg):
         paragraphs = soup.find("div", {"class": "article-text"})
         article = paragraphs.find("p")
         date = soup.find('p', attrs={'class': 'article-date-time'}).string
-        date = helpers.decode(date)
       except Exception as e:
         log.error('Error scraping JPost article at %s: %s' % (url, e))
 
       body = article.text
 
-      log.info(headline)
+      headline = helpers.decode(headline)
+      body = helpers.decode(body)
+      date = helpers.decode(date)
       return news_interface.Article(headline, body, url, news_orgs.JPOST, date)
     except Exception as e:
       log.info("Hit exception getting article for %s: %s" % (url, e))

@@ -32,9 +32,11 @@ class TimesOfIsrael(news_interface.NewsOrg):
       headline = helpers.decode(h1.text)
       paragraphs = soup.findAll("p", {"itemprop": "articleBody"})
       body = ' '.join([helpers.decode(p.text) for p in paragraphs])
-      date = helpers.decode(
-          soup.find('span', attrs={'class': 'date'}).getText())
+      date = soup.find('span', attrs={'class': 'date'}).getText()
 
+      headline = helpers.decode(headline)
+      body = helpers.decode(body)
+      date = helpers.decode(date)
       return news_interface.Article(headline, body, url,
                                     news_orgs.TIMES_OF_ISRAEL, date)
     except Exception as e:

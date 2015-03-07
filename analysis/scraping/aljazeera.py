@@ -58,6 +58,10 @@ class AlJazeera(news_interface.NewsOrg):
         date = soup.find("time").string
       except AttributeError:
         date = soup.find("span", {"class": "date"}).string
+
+      headline = helpers.decode(headline)
+      body = helpers.decode(body)
+      date = helpers.decode(date)
       return news_interface.Article(headline, body, url, news_orgs.ALJAZEERA,
                                     date)
     except Exception as e:

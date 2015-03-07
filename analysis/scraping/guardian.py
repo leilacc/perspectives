@@ -37,8 +37,11 @@ class Guardian(news_interface.NewsOrg):
       paragraphs = article.find_all('p', attrs={'class': None})
       body = ' '.join([p.get_text() for p in paragraphs])
 
-      date = helpers.decode(soup.find('time', attrs={'itemprop': 'datePublished'}).contents[0])
+      date = soup.find('time', attrs={'itemprop': 'datePublished'}).contents[0]
 
+      headline = helpers.decode(headline)
+      body = helpers.decode(body)
+      date = helpers.decode(date)
       return news_interface.Article(headline, body, url, news_orgs.GUARDIAN,
                                     date)
     except Exception as e:

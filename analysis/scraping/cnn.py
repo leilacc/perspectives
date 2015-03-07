@@ -44,6 +44,9 @@ class CNN(news_interface.NewsOrg):
       except AttributeError:
         date = soup.find('p', attrs={'class': 'metadata__data-added'}).string
 
+      headline = helpers.decode(headline)
+      body = helpers.decode(body)
+      date = helpers.decode(date)
       return news_interface.Article(headline, body, url, news_orgs.CNN, date)
     except Exception as e:
       log.info("Hit exception getting article for %s: %s" % (url, e))

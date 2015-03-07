@@ -37,9 +37,11 @@ class RussiaToday(news_interface.NewsOrg):
                                         p == 'Tags' or
                                         p == 'Trends')])
 
-      date = helpers.decode(
-          soup.find('span', attrs={'class': 'time'}).contents[0])
+      date = soup.find('span', attrs={'class': 'time'}).contents[0]
 
+      headline = helpers.decode(headline)
+      body = helpers.decode(body)
+      date = helpers.decode(date)
       return news_interface.Article(headline, body, url, news_orgs.RUSSIA_TODAY,
                                     date)
     except Exception as e:

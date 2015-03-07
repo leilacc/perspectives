@@ -40,9 +40,11 @@ class CBC(news_interface.NewsOrg):
       article = soup.find('div', attrs={'class': 'story-content'})
       paragraphs = article.find_all('p', attrs={'class': None})
       body = ' '.join([p.get_text() for p in paragraphs])
-      log.info(headline)
-
       date = soup.find('span', attrs={'class': 'delimited'}).string
+
+      headline = helpers.decode(headline)
+      body = helpers.decode(body)
+      date = helpers.decode(date)
       return news_interface.Article(headline, body, url, news_orgs.CBC, date)
     except Exception as e:
       log.info("Hit exception getting article for %s: %s" % (url, e))

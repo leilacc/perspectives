@@ -33,6 +33,9 @@ class Reuters(news_interface.NewsOrg):
 
       date = soup.find('span', attrs={'class': 'timestamp'}).string
 
+      headline = helpers.decode(headline)
+      body = helpers.decode(body)
+      date = helpers.decode(date)
       return news_interface.Article(headline, body, url, news_orgs.REUTERS,
                                     date)
     except Exception as e:

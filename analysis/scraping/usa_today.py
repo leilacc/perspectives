@@ -33,6 +33,10 @@ class USAToday(news_interface.NewsOrg):
       body = ' '.join([helpers.decode(p.get_text()) for p in paragraphs])
       time_span = soup.find('span', attrs={'class': 'asset-metabar-time'})
       date = time_span.contents[0]
+
+      headline = helpers.decode(headline)
+      body = helpers.decode(body)
+      date = helpers.decode(date)
       return news_interface.Article(headline, body, url, news_orgs.USA_TODAY,
                                     date)
     except Exception as e:

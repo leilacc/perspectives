@@ -44,7 +44,9 @@ class GlobeAndMail(news_interface.NewsOrg):
 
       date = soup.find('time').string
 
-      log.info(headline)
+      headline = helpers.decode(headline)
+      body = helpers.decode(body)
+      date = helpers.decode(date)
       return news_interface.Article(headline, body, url,
                                     news_orgs.GLOBE_AND_MAIL, date)
     except Exception as e:

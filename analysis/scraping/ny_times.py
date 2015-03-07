@@ -47,6 +47,9 @@ class NYTimes(news_interface.NewsOrg):
       except AttributeError:
         date = soup.find('time', attrs={'class': 'dateline'}).string
 
+      headline = helpers.decode(headline)
+      body = helpers.decode(body)
+      date = helpers.decode(date)
       return news_interface.Article(headline, body, url, news_orgs.NY_TIMES,
                                     date)
     except Exception as e:

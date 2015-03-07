@@ -34,6 +34,9 @@ class HuffPost(news_interface.NewsOrg):
       paragraphs = article.find_all('p', attrs={'class': None})
       body = ' '.join([p.get_text() for p in paragraphs])
       date = soup.find('span', attrs={'class': 'posted'}).find('time').string
+
+      headline = helpers.decode(headline)
+      body = helpers.decode(body)
       date = helpers.decode(date)
       return news_interface.Article(headline, body, url, news_orgs.HUFF_POST,
                                     date)

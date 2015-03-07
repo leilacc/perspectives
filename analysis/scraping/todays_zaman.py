@@ -37,9 +37,10 @@ class TodaysZaman(news_interface.NewsOrg):
       body = ' '.join([helpers.decode(p.text) for p in article])
       dateDiv = soup.find('div', attrs={'class': 'pageNewsDetailDate'})
       date = dateDiv.contents[1].getText()
-      date = helpers.decode(date)
 
-      log.info(headline)
+      headline = helpers.decode(headline)
+      body = helpers.decode(body)
+      date = helpers.decode(date)
       return news_interface.Article(headline, body, url, news_orgs.TODAYS_ZAMAN,
                                     date)
     except Exception as e:
