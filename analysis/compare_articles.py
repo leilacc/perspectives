@@ -145,7 +145,11 @@ def get_ancestors(synset):
 def get_synsets_and_ancestors(phrases, NP=True):
   '''Returns a list of synsets in phrases, and their ancestors.
 
-  phrases: A list of phrases (NPs or VPs).
+  Args:
+    phrases: A list of phrases (NPs or VPs).
+
+  Returns:
+    A list of the synsets contained in phrases, and their ancestors.
   '''
   synsets = []
   for phrase in phrases:
@@ -169,12 +173,59 @@ def highlight_sentence(highlighted_sentences, phrases, key):
     highlighted_sentences[sentence] = sentence.replace(key, '**%s**' % key)
   return highlighted_sentences
 
-def compare_articles(a1_NPs, a1_VPs, a1_NP_synsets, a1_VP_synsets,
-                     NPs, VPs, a2_text):
-  '''Returns a list of sentences from article2 that contain semantic concepts
-  very different from article1.'''
-  a2_NP_to_sentence = get_NPs(a2_text)
-  a2_VP_to_sentence = get_VPs(a2_text)
+def check_distances(diff, comparison_synsets, phrase_to_sentence,
+                    highlighted_sentences, NP=True):
+  '''Checks the distance from each NP in diff to the comparison_synsets and
+  adds the corresponsing sentence from NP_to_sentence to highlighted_sentences
+  if the distance is great enough.
+
+  diff: A list of noun or verb phrases.
+  comparison_synsets: A list of noun or verb synsets.
+  phrase_to_sentence: An NP or VP to sentence dictionary.
+  highlighted_sentences: A dict of sentences to their highlighted versions.
+  NP: True if the phrases are noun phrases, False if they are verb phrases.
+
+  Returns: None, but alters highlighted_sentences.
+  '''
+  for phrase in diff:
+    phrase = phrase.encode('utf-8')
+    if NP:
+      synset = get_synset(phrase)
+    else:
+      synset = wn.synsets(phrase, 'v')
+      if synset:
+        synset = synset[0]
+
+    if synset:
+      distance = synset_distance(synset, comparison_synsets)
+      if distance > 4 and distance != float("inf"):
+        highlight_sentence(highlighted_sentences, phrase_to_sentence, phrase)
+
+def compare_articles(a1_NP_to_sentence, a1_VP_to_sentence,
+                     a1_NPs, a1_VPs,
+                     a1_NP_synsets, a1_VP_synsets,
+                     comparison_article):
+  '''Compares the noun and verb phrases of article a1 to a comparison_article.
+
+  Args:
+    a1_NP_to_sentence: A dict of each noun phrase in article 1 to the sentence
+      that contains it.
+    a1_VP_to_sentence: A dict of each verb phrase in article 1 to the sentence
+      that contains it.
+    a1_NPs: A list of every noun phrase in article 1.
+    a1_VPs: A list of every verb phrase in article 1.
+    a1_NP_synsets: A list of all the noun synsets and their ancestors from
+      article 1.
+    a1_VP_synsets: A list of all the verb synsets and their ancestors from
+      article 1.
+    comparison_article: the Article to be compared to article 1.
+
+  Returns:
+    A json-encoded list of sentences from comparison_article that
+    contain semantic concepts very different from the article a1.
+  '''
+  a2_NP_to_sentence = get_NPs(comparison_article.body)
+  a2_VP_to_sentence = get_VPs(comparison_article.body)
 
   a2_NPs = set(a2_NP_to_sentence)
   a2_VPs = set(a2_VP_to_sentence)
@@ -183,24 +234,17 @@ def compare_articles(a1_NPs, a1_VPs, a1_NP_synsets, a1_VP_synsets,
   diff_VPs = a2_VPs.difference(a1_VPs)
 
   highlighted_sentences = {}
-  for np in diff_NPs:
-    np = np.encode('utf-8')
-    synset = get_synset(np)
-    if synset:
-      distance = synset_distance(synset, a1_NP_synsets)
-      if distance > 3:
-        highlight_sentence(highlighted_sentences, a2_NP_to_sentence, np)
+  check_distances(diff_NPs, a1_NP_synsets, a2_NP_to_sentence,
+                  highlighted_sentences)
+  check_distances(diff_VPs, a1_VP_synsets, a2_VP_to_sentence,
+                  highlighted_sentences, NP=False)
 
-  for verb in diff_VPs:
-    verb = verb.encode('utf-8')
-    synset = wn.synsets(verb, 'v')
-    if synset:
-      synset = synset[0]
-      distance = synset_distance(synset, a1_VP_synsets)
-      if distance > 5 and distance != float("inf"):
-        highlight_sentence(highlighted_sentences, a2_VP_to_sentence, verb)
-
-  return highlighted_sentences.values()
+  comparison_results = comparison_article.to_dict()
+  comparison_results['sentences'] = highlighted_sentences.values()
+  if comparison_results['sentences']:
+    return json.dumps(comparison_results)
+  else:
+    return None
 
 def compare_to_all_articles(article_body, comparison_articles):
   '''Compares article to the comparison_articles.
@@ -229,6 +273,6 @@ def compare_to_all_articles(article_body, comparison_articles):
       comparison_results = comparison_article.to_dict()
       comparison_results['sentences'] = compare_articles(
           articleNPs, articleVPs, NPs, VPs, NP_synsets, VP_synsets,
-          comparison_article.body)
+          comparison_article)
       all_results.append(comparison_results)
   return json.dumps(all_results)

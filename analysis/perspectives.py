@@ -1,5 +1,6 @@
 '''Get perspectives from different articles.'''
 
+import json
 from Queue import Queue
 import re
 from threading import Thread
@@ -51,8 +52,23 @@ def get_perspectives(url):
   article = url_to_article(url)
   if article:
     article_topic = extract_keywords.extract_keywords(article.headline)
-    related_articles = query_all_news_orgs(article_topic)
-    return compare_articles.compare_to_all_articles(article.body, related_articles)
+
+    NP_to_sentence = compare_articles.get_NPs(article.body)
+    NPs = set(NP_to_sentence.keys())
+    NP_synsets = compare_articles.get_synsets_and_ancestors(NPs)
+
+    VP_to_sentence = compare_articles.get_VPs(article.body)
+    VPs = set(VP_to_sentence.keys())
+    VP_synsets = compare_articles.get_synsets_and_ancestors(VPs, NP=False)
+
+    news_org.get_query_results(article_topic)
+    compare_articles.compare_articles(NP_to_sentence, VP_to_sentence,
+                                      NPs, VPs,
+                                      NP_synsets, VP_synsets,
+                                      comparison_article)
+
+  else:
+    return json.dumps("Not a recognized article")
 
 def query_all_news_orgs(query):
   '''Get the top articles for the given query from all supported news orgs.
@@ -114,3 +130,4 @@ def url_to_article(url):
     return USA_TODAY.get_article(url)
   else:
     logger.log.info("Didn't regexp match for %s" % url)
+    return None
