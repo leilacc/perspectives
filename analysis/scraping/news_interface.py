@@ -1,6 +1,6 @@
 import sys
 
-NUM_ARTICLES = 3
+NUM_ARTICLES = 2
 
 def _functionId(obj, nFramesUp):
     '''Create a string naming the function n frames up on the stack.'''
