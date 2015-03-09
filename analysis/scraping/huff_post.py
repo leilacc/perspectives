@@ -14,6 +14,9 @@ logging.basicConfig(filename='huff_post.log', level=logging.WARNING)
 class HuffPost(news_interface.NewsOrg):
   '''Methods for interacting with the Huffington Post website/API.'''
 
+  def __repr__(self):
+    return news_orgs.HUFF_POST
+
   def get_article(self, url):
     '''Implementation for getting an article from Huffington Post.
 

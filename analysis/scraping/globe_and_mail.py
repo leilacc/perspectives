@@ -14,6 +14,9 @@ logging.basicConfig(filename='globe_and_mail.log', level=logging.WARNING)
 class GlobeAndMail(news_interface.NewsOrg):
   '''Methods for interacting with the Globe and Mail website.'''
 
+  def __repr__(self):
+    return news_orgs.GLOBE_AND_MAIL
+
   def get_article(self, url):
     '''Implementation for getting an article from the Globe and Mail.
 

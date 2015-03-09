@@ -14,6 +14,9 @@ logging.basicConfig(filename='usa_today.log', level=logging.WARNING)
 class USAToday(news_interface.NewsOrg):
   '''Methods for interacting with the USA Today website/API.'''
 
+  def __repr__(self):
+    return news_orgs.USA_TODAY
+
   def get_article(self, url):
     '''Implementation for getting an article from USA Today.
 

@@ -13,6 +13,9 @@ logging.basicConfig(filename='russia_today.log', level=logging.WARNING)
 class RussiaToday(news_interface.NewsOrg):
   '''Methods for interacting with the RussiaToday website/API.'''
 
+  def __repr__(self):
+    return news_orgs.RUSSIA_TODAY
+
   def get_article(self, url):
     '''Implementation for getting an article from the Russia Today.
 

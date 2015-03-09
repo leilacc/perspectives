@@ -12,6 +12,9 @@ logging.basicConfig(filename='cnn.log', level=logging.WARNING)
 class CNN(news_interface.NewsOrg):
   '''Methods for interacting with the CNN website.'''
 
+  def __repr__(self):
+    return news_orgs.CNN
+
   def get_article(self, url):
     '''Implementation for getting an article from CNN.
 

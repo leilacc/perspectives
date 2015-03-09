@@ -12,6 +12,9 @@ logging.basicConfig(filename='jpost.log', level=logging.WARNING)
 class JPost(news_interface.NewsOrg):
   '''Methods for interacting with the JPOST website.'''
 
+  def __repr__(self):
+    return news_orgs.JPOST
+
   def get_article(self, url):
     '''Implementation for getting an article from JPost.
 

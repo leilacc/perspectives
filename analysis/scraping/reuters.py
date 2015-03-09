@@ -12,6 +12,9 @@ logging.basicConfig(filename='reuters.log', level=logging.WARNING)
 class Reuters(news_interface.NewsOrg):
   '''Methods for interacting with the REUTERS website.'''
 
+  def __repr__(self):
+    return news_orgs.REUTERS
+
   def get_article(self, url):
     '''Implementation for getting an article from REUTERS.
 

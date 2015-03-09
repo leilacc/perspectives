@@ -12,6 +12,9 @@ logging.basicConfig(filename='times_of_israel.log', level=logging.WARNING)
 class TimesOfIsrael(news_interface.NewsOrg):
   '''Methods for interacting with the Times of Israel website.'''
 
+  def __repr__(self):
+    return news_orgs.TIMES_OF_ISRAEL
+
   def get_article(self, url):
     '''Implementation for getting an article from Times of Israel.
 

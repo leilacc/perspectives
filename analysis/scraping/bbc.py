@@ -13,6 +13,9 @@ logging.basicConfig(filename='bbc.log', level=logging.WARNING)
 class BBC(news_interface.NewsOrg):
   '''Methods for interacting with the BBC website.'''
 
+  def __repr__(self):
+    return news_orgs.BBC
+
   def get_article(self, url):
     '''Implementation for getting an article from BBC.
 

@@ -14,6 +14,9 @@ logging.basicConfig(filename='cbc.log', level=logging.WARNING)
 class CBC(news_interface.NewsOrg):
   '''Methods for interacting with the CBC website.'''
 
+  def __repr__(self):
+    return news_orgs.CBC
+
   def get_article(self, url):
     '''Implementation for getting an article from the CBC.
 

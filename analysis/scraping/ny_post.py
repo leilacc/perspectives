@@ -20,6 +20,9 @@ class NYPost(news_interface.NewsOrg):
   >>> nyp.get_article('http://nypost.com/2015/01/25/paris-terrorists-fit-profile-of-homegrown-threat-described-in-2007-nypd-report/')
   '''
 
+  def __repr__(self):
+    return news_orgs.NY_POST
+
   def get_article(self, url):
     '''Implementation for getting an article from the New York Post.
 

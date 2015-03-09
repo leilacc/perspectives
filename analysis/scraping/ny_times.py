@@ -15,6 +15,9 @@ logging.basicConfig(filename='ny_times.log', level=logging.WARNING)
 class NYTimes(news_interface.NewsOrg):
   '''Methods for interacting with the NYTimes website/API.'''
 
+  def __repr__(self):
+    return news_orgs.NY_TIMES
+
   def get_article(self, url):
     '''Implementation for getting an article from the NYTimes.
 

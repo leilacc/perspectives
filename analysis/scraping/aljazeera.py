@@ -13,6 +13,9 @@ logging.basicConfig(filename='aljazeera.log', level=logging.WARNING)
 class AlJazeera(news_interface.NewsOrg):
   '''Methods for interacting with the Al Jazeera website.'''
 
+  def __repr__(self):
+    return news_orgs.ALJAZEERA
+
   def get_article(self, url):
     '''Implementation for getting an article from Al Jazeera.
 

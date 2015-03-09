@@ -12,6 +12,9 @@ logging.basicConfig(filename='todays_zaman.log', level=logging.WARNING)
 class TodaysZaman(news_interface.NewsOrg):
   '''Methods for interacting with the Todays Zaman website.'''
 
+  def __repr__(self):
+    return news_orgs.TODAYS_ZAMAN
+
   def get_article(self, url):
     '''Implementation for getting an article from Todays Zaman.
 
