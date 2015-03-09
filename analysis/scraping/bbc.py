@@ -3,11 +3,10 @@ import json
 import logging
 import requests
 
-from api_keys import api_keys
-import helpers
-from logger import log
-import news_interface
-import news_orgs
+from . import helpers
+from . import logger
+from . import news_interface
+from . import news_orgs
 
 logging.basicConfig(filename='bbc.log', level=logging.WARNING)
 
@@ -34,7 +33,7 @@ class BBC(news_interface.NewsOrg):
       date = helpers.decode(soup.find('span', attrs={'class': 'date'}).string)
       return news_interface.Article(headline, body, url, news_orgs.BBC, date)
     except Exception as e:
-      log.info("Hit exception getting article for %s: %s" % (url, e))
+      logger.log.info("Hit exception getting article for %s: %s" % (url, e))
 
   def get_query_results(self, query):
     '''Implementation for keyword searches from BBC.

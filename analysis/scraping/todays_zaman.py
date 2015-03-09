@@ -2,13 +2,10 @@ from bs4 import BeautifulSoup
 import logging
 import requests
 
-import helpers
-from logger import log
-import news_interface
-import news_orgs
-
-import urllib2
-
+from . import helpers
+from . import logger
+from . import news_interface
+from . import news_orgs
 
 logging.basicConfig(filename='todays_zaman.log', level=logging.WARNING)
 
@@ -44,7 +41,7 @@ class TodaysZaman(news_interface.NewsOrg):
       return news_interface.Article(headline, body, url, news_orgs.TODAYS_ZAMAN,
                                     date)
     except Exception as e:
-      log.info("Hit exception getting article for %s: %s" % (url, e))
+      logger.log.info("Hit exception getting article for %s: %s" % (url, e))
 
   def get_query_results(self, query):
     '''Implementation for keyword searches from Todays Zaman.

@@ -3,11 +3,10 @@ import json
 import logging
 import requests
 
-import helpers
-from logger import log
-import news_interface
-import news_orgs
-import api_keys
+from . import helpers
+from . import logger
+from . import news_interface
+from . import news_orgs
 
 logging.basicConfig(filename='globe_and_mail.log', level=logging.WARNING)
 
@@ -50,7 +49,7 @@ class GlobeAndMail(news_interface.NewsOrg):
       return news_interface.Article(headline, body, url,
                                     news_orgs.GLOBE_AND_MAIL, date)
     except Exception as e:
-      log.info("Hit exception getting article for %s: %s" % (url, e))
+      logger.log.info("Hit exception getting article for %s: %s" % (url, e))
 
   def get_query_results(self, query):
     '''Implementation for getting an article from the Globe and Mail.

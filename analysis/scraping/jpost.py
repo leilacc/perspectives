@@ -1,12 +1,11 @@
 from bs4 import BeautifulSoup
 import logging
 import requests
-import urllib2
 
-import helpers
-from logger import log
-import news_interface
-import news_orgs
+from . import helpers
+from . import logger
+from . import news_interface
+from . import news_orgs
 
 logging.basicConfig(filename='jpost.log', level=logging.WARNING)
 
@@ -22,30 +21,30 @@ class JPost(news_interface.NewsOrg):
     Returns:
       The Article representing the article at that url.
     '''
+#    try:
+    html = helpers.get_content(url)
+    if not html:
+      return None
+
+    soup = BeautifulSoup(html)
+
     try:
-      html = helpers.get_content(url)
-      if not html:
-        return None
-
-      soup = BeautifulSoup(html)
-
-      try:
-        a = soup.find('h1', attrs={'class': 'article-title'})
-        headline = a.text.strip().strip('\r\n')
-        paragraphs = soup.find("div", {"class": "article-text"})
-        article = paragraphs.find("p")
-        date = soup.find('p', attrs={'class': 'article-date-time'}).string
-      except Exception as e:
-        log.error('Error scraping JPost article at %s: %s' % (url, e))
-
-      body = article.text
-
-      headline = helpers.decode(headline)
-      body = helpers.decode(body)
-      date = helpers.decode(date)
-      return news_interface.Article(headline, body, url, news_orgs.JPOST, date)
+      a = soup.find('h1', attrs={'class': 'article-title'})
+      headline = a.text.strip().strip('\r\n')
+      paragraphs = soup.find("div", {"class": "article-text"})
+      article = paragraphs.find("p")
+      date = soup.find('p', attrs={'class': 'article-date-time'}).string
     except Exception as e:
-      log.info("Hit exception getting article for %s: %s" % (url, e))
+      logger.log.error('Error scraping JPost article at %s: %s' % (url, e))
+
+    body = article.text
+
+    headline = helpers.decode(headline)
+    body = helpers.decode(body)
+    date = helpers.decode(date)
+    return news_interface.Article(headline, body, url, news_orgs.JPOST, date)
+ #   except Exception as e:
+  #    logger.log.info("Hit exception getting article for %s: %s" % (url, e))
 
   def get_query_results(self, query):
     '''Implementation for keyword searches from JPost.

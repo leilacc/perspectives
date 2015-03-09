@@ -2,10 +2,10 @@ from bs4 import BeautifulSoup
 import logging
 import requests
 
-import helpers
-from logger import log
-import news_interface
-import news_orgs
+from . import helpers
+from . import logger
+from . import news_interface
+from . import news_orgs
 
 logging.basicConfig(filename='reuters.log', level=logging.WARNING)
 
@@ -39,7 +39,7 @@ class Reuters(news_interface.NewsOrg):
       return news_interface.Article(headline, body, url, news_orgs.REUTERS,
                                     date)
     except Exception as e:
-      log.info("Hit exception getting article for %s: %s" % (url, e))
+      logger.log.info("Hit exception getting article for %s: %s" % (url, e))
 
   def get_query_results(self, query):
     '''Implementation for keyword searches from REUTERS.

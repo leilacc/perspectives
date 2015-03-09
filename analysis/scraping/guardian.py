@@ -3,11 +3,11 @@ import json
 import logging
 import requests
 
-from api_keys import api_keys
-import helpers
-from logger import log
-import news_interface
-import news_orgs
+from . import api_keys
+from . import helpers
+from . import logger
+from . import news_interface
+from . import news_orgs
 
 logging.basicConfig(filename='guardian.log', level=logging.WARNING)
 
@@ -45,7 +45,7 @@ class Guardian(news_interface.NewsOrg):
       return news_interface.Article(headline, body, url, news_orgs.GUARDIAN,
                                     date)
     except Exception as e:
-      log.info("Hit exception getting article for %s: %s" % (url, e))
+      logger.log.info("Hit exception getting article for %s: %s" % (url, e))
 
   def get_query_results(self, query):
     '''Implementation for getting an article from the Guardian.
@@ -56,7 +56,7 @@ class Guardian(news_interface.NewsOrg):
     '''
     res = requests.get(
         'http://content.guardianapis.com/search?q=%s&api-key=%s'
-        % (query, api_keys[news_orgs.GUARDIAN]))
+        % (query, api_keys.api_keys[news_orgs.GUARDIAN]))
     results = json.loads(res.text)['response']['results']
     article_urls = [res['webUrl'] for res in results]
 

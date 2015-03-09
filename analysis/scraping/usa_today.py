@@ -3,11 +3,11 @@ import logging
 import requests
 import xmltodict
 
-import helpers
-from logger import log
-import news_interface
-import news_orgs
-import api_keys
+from . import api_keys
+from . import helpers
+from . import logger
+from . import news_interface
+from . import news_orgs
 
 logging.basicConfig(filename='usa_today.log', level=logging.WARNING)
 
@@ -40,7 +40,7 @@ class USAToday(news_interface.NewsOrg):
       return news_interface.Article(headline, body, url, news_orgs.USA_TODAY,
                                     date)
     except Exception as e:
-      log.info("Hit exception getting article for %s: %s" % (url, e))
+      logger.log.info("Hit exception getting article for %s: %s" % (url, e))
 
   def get_query_results(self, query):
     '''Implementation for keyword searches from USA Today.
@@ -57,7 +57,7 @@ class USAToday(news_interface.NewsOrg):
     try:
       all_articles = xml_dict['rss']['channel']['item']
     except KeyError:
-      log.error(res.text)
+      logger.log.error(res.text)
 
     top_articles = []
     for article in all_articles[0:news_interface.NUM_ARTICLES]:

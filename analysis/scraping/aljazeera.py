@@ -2,12 +2,11 @@ from bs4 import BeautifulSoup
 import json
 import logging
 import requests
-import urllib2
 
-import helpers
-from logger import log
-import news_interface
-import news_orgs
+from . import helpers
+from . import logger
+from . import news_interface
+from . import news_orgs
 
 logging.basicConfig(filename='aljazeera.log', level=logging.WARNING)
 
@@ -40,8 +39,8 @@ class AlJazeera(news_interface.NewsOrg):
         except AttributeError:
           continue
       if not headline:
-        log.error('Exception trying to scrape Al Jazeera headline from %s'
-                  % (url))
+        logger.log.error(
+            'Exception trying to scrape Al Jazeera headline from %s' % (url))
         return None
 
       headline = helpers.decode(headline)
@@ -65,7 +64,7 @@ class AlJazeera(news_interface.NewsOrg):
       return news_interface.Article(headline, body, url, news_orgs.ALJAZEERA,
                                     date)
     except Exception as e:
-      log.info("Hit exception getting article for %s: %s" % (url, e))
+      logger.log.info("Hit exception getting article for %s: %s" % (url, e))
 
   def get_query_results(self, query):
     '''Implementation for keyword searches from Al Jazeera.
