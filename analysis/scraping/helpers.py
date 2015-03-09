@@ -3,6 +3,8 @@
 import codecs
 import re
 import requests
+import sys
+
 from . import logger
 
 def decode(strr):
@@ -13,7 +15,11 @@ def decode(strr):
   strr = re.sub(u'\u201C', '"', strr)
   strr = re.sub(u'\u201d', '"', strr)
   strr = re.sub(u'\u2013', '"', strr)
-  strr = strr.encode('ascii', 'ignore')
+
+  if sys.version_info < (3, 0):
+    # Python 2
+    strr = strr.encode('ascii', 'ignore')
+
   return strr
 
 def get_content(url):
