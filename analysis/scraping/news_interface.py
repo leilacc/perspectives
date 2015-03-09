@@ -15,6 +15,10 @@ def abstractMethod(obj=None):
 class NewsOrg:
   '''Represents a news organization.'''
 
+  def __repr__(self):
+    '''Representation of the NewsOrg.'''
+    abstractMethod(self)
+
   def get_article(self, url):
     '''Return an Article representing the article at url.'''
     abstractMethod(self)
