@@ -30,5 +30,5 @@ def get_content(url):
     text = text.strip().strip('\r\n').strip('\n')
     return text
   except Exception as e:
-    log.error('Error getting content for url %s: %s' % (url, e))
+    logger.log.error('Error getting content for url %s: %s' % (url, e))
     return None
