@@ -65,9 +65,9 @@ class HuffPost(news_interface.NewsOrg):
     article_urls = [res['url'] for res in results]
 
     top_articles = []
-    for url in article_urls:
+    for url in article_urls[0:news_interface.NUM_ARTICLES]:
       if url.endswith('.html'):
         # Huff Post sometimes returns aggregator pages that don't
         # contain an article and don't end in .html
         top_articles.append(self.get_article(url))
-    return top_articles[0:news_interface.NUM_ARTICLES]
+    return top_articles

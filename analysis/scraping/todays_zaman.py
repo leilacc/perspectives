@@ -72,4 +72,3 @@ class TodaysZaman(news_interface.NewsOrg):
       top_articles.append(self.get_article(url))
 
     return top_articles
-
