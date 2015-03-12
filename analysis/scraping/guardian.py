@@ -9,7 +9,9 @@ from . import logger
 from . import news_interface
 from . import news_orgs
 
-logging.basicConfig(filename='guardian.log', level=logging.WARNING)
+logging.basicConfig(filename='%s/guardian.log' % logger.cwd,
+                    level=logging.DEBUG,
+                    format=logger.fmt, datefmt=logger.datefmt)
 
 
 class Guardian(news_interface.NewsOrg):

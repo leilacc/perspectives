@@ -8,7 +8,10 @@ from . import logger
 from . import news_interface
 from . import news_orgs
 
-logging.basicConfig(filename='aljazeera.log', level=logging.WARNING)
+logging.basicConfig(filename='%s/aljazeera.log' % logger.cwd,
+                    level=logging.DEBUG,
+                    format=logger.fmt, datefmt=logger.datefmt)
+
 
 class AlJazeera(news_interface.NewsOrg):
   '''Methods for interacting with the Al Jazeera website.'''
@@ -84,7 +87,7 @@ class AlJazeera(news_interface.NewsOrg):
     json_res = json.loads(json_res)['results']
     article_urls = [result['url'] for result in json_res]
     top_articles = []
-    for url in article_urls:
+    for url in article_urls[0:news_interface.NUM_ARTICLES]:
       if 'topics' not in url and 'blogs' not in url: # not an article page
         top_articles.append(self.get_article(url))
-    return top_articles[0:news_interface.NUM_ARTICLES]
+    return top_articles

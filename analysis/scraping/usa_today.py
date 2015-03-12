@@ -9,7 +9,10 @@ from . import logger
 from . import news_interface
 from . import news_orgs
 
-logging.basicConfig(filename='usa_today.log', level=logging.WARNING)
+logging.basicConfig(filename='%s/usa_today.log' % logger.cwd,
+                    level=logging.DEBUG,
+                    format=logger.fmt, datefmt=logger.datefmt)
+
 
 class USAToday(news_interface.NewsOrg):
   '''Methods for interacting with the USA Today website/API.'''

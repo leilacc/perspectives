@@ -7,7 +7,10 @@ from . import logger
 from . import news_interface
 from . import news_orgs
 
-logging.basicConfig(filename='todays_zaman.log', level=logging.WARNING)
+logging.basicConfig(filename='%s/todays_zaman.log' % logger.cwd,
+                    level=logging.DEBUG,
+                    format=logger.fmt, datefmt=logger.datefmt)
+
 
 class TodaysZaman(news_interface.NewsOrg):
   '''Methods for interacting with the Todays Zaman website.'''

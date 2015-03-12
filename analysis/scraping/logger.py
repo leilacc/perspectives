@@ -1,4 +1,6 @@
+import inspect
 import logging
+import os
 import sys
 
 # Log WARNING and higher to stdout
@@ -9,3 +11,5 @@ datefmt = '%m/%d/%Y %I:%M:%S %p'
 out_hdlr.setFormatter(logging.Formatter(fmt=fmt, datefmt=datefmt))
 out_hdlr.setLevel(logging.WARNING)
 log.addHandler(out_hdlr)
+
+cwd = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))

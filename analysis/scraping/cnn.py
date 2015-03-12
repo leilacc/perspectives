@@ -7,7 +7,10 @@ from . import logger
 from . import news_interface
 from . import news_orgs
 
-logging.basicConfig(filename='cnn.log', level=logging.WARNING)
+logging.basicConfig(filename='%s/cnn.log' % logger.cwd,
+                    level=logging.DEBUG,
+                    format=logger.fmt, datefmt=logger.datefmt)
+
 
 class CNN(news_interface.NewsOrg):
   '''Methods for interacting with the CNN website.'''

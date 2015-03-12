@@ -9,7 +9,10 @@ from . import logger
 from . import news_interface
 from . import news_orgs
 
-logging.basicConfig(filename='huff_post.log', level=logging.WARNING)
+logging.basicConfig(filename='%s/huff_post.log' % logger.cwd,
+                    level=logging.DEBUG,
+                    format=logger.fmt, datefmt=logger.datefmt)
+
 
 class HuffPost(news_interface.NewsOrg):
   '''Methods for interacting with the Huffington Post website/API.'''

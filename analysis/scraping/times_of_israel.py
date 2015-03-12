@@ -7,7 +7,10 @@ from . import logger
 from . import news_interface
 from . import news_orgs
 
-logging.basicConfig(filename='times_of_israel.log', level=logging.WARNING)
+logging.basicConfig(filename='%s/times_of_israel.log' % logger.cwd,
+                    level=logging.DEBUG,
+                    format=logger.fmt, datefmt=logger.datefmt)
+
 
 class TimesOfIsrael(news_interface.NewsOrg):
   '''Methods for interacting with the Times of Israel website.'''

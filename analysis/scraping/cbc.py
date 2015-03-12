@@ -8,7 +8,9 @@ from . import logger
 from . import news_interface
 from . import news_orgs
 
-logging.basicConfig(filename='cbc.log', level=logging.WARNING)
+logging.basicConfig(filename='%s/cbc.log' % logger.cwd,
+                    level=logging.DEBUG,
+                    format=logger.fmt, datefmt=logger.datefmt)
 
 
 class CBC(news_interface.NewsOrg):

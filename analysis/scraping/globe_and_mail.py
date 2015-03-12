@@ -8,7 +8,9 @@ from . import logger
 from . import news_interface
 from . import news_orgs
 
-logging.basicConfig(filename='globe_and_mail.log', level=logging.WARNING)
+logging.basicConfig(filename='%s/globe_and_mail.log' % logger.cwd,
+                    level=logging.DEBUG,
+                    format=logger.fmt, datefmt=logger.datefmt)
 
 
 class GlobeAndMail(news_interface.NewsOrg):

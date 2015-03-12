@@ -7,7 +7,9 @@ from . import logger
 from . import news_interface
 from . import news_orgs
 
-logging.basicConfig(filename='russia_today.log', level=logging.WARNING)
+logging.basicConfig(filename='%s/russia_today.log' % logger.cwd,
+                    level=logging.DEBUG,
+                    format=logger.fmt, datefmt=logger.datefmt)
 
 
 class RussiaToday(news_interface.NewsOrg):

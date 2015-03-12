@@ -7,7 +7,10 @@ from . import logger
 from . import news_interface
 from . import news_orgs
 
-logging.basicConfig(filename='reuters.log', level=logging.WARNING)
+logging.basicConfig(filename='%s/reuters.log' % logger.cwd,
+                    level=logging.DEBUG,
+                    format=logger.fmt, datefmt=logger.datefmt)
+
 
 class Reuters(news_interface.NewsOrg):
   '''Methods for interacting with the REUTERS website.'''

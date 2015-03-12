@@ -8,7 +8,9 @@ from . import logger
 from . import news_interface
 from . import news_orgs
 
-logging.basicConfig(filename='ny_post.log', level=logging.WARNING)
+logging.basicConfig(filename='%s/ny_post.log' % logger.cwd,
+                    level=logging.DEBUG,
+                    format=logger.fmt, datefmt=logger.datefmt)
 
 
 class NYPost(news_interface.NewsOrg):
