@@ -1,9 +1,8 @@
 '''Get perspectives from different articles.'''
 
+import futures
 import json
-from Queue import Queue
 import re
-from threading import Thread
 
 import compare_articles
 import extract_keywords
@@ -51,24 +50,50 @@ def get_perspectives(url):
   '''
   article = url_to_article(url)
   if article:
-    article_topic = extract_keywords.extract_keywords(article.headline)
+    headline = article.headline
+    body = article.body
+    article_topic = extract_keywords.extract_keywords(headline)
 
-    NP_to_sentence = compare_articles.get_NPs(article.body)
+    NP_to_sentence = compare_articles.get_NPs(body)
     NPs = set(NP_to_sentence.keys())
-    NP_synsets = compare_articles.get_synsets_and_ancestors(NPs)
 
-    VP_to_sentence = compare_articles.get_VPs(article.body)
+    VP_to_sentence = compare_articles.get_VPs(body)
     VPs = set(VP_to_sentence.keys())
-    VP_synsets = compare_articles.get_synsets_and_ancestors(VPs, NP=False)
 
-    news_org.get_query_results(article_topic)
-    compare_articles.compare_articles(NP_to_sentence, VP_to_sentence,
-                                      NPs, VPs,
-                                      NP_synsets, VP_synsets,
-                                      comparison_article)
-
+    n = len(NEWS_ORGS)
+    with futures.ProcessPoolExecutor(max_workers=n) as executor:
+      comparisons = executor.map(get_comparison, NEWS_ORGS, [article_topic]*n,
+                                 [NP_to_sentence]*n, [VP_to_sentence]*n,
+                                 [NPs]*n, [VPs]*n,
+                                 [1]*n)
+      return json.dumps(list(comparisons))
+    #return json.dumps(get_comparison(1,article_topic,1,1,1,1,1,1, article.body))
   else:
     return json.dumps("Not a recognized article")
+
+def test_args(n, k, j, l, m, q, o, t, r):
+  return []
+
+
+def get_comparison(news_org, article_topic, NP_to_sentence, VP_to_sentence,
+                   NPs, VPs, article_body):
+  '''Compares the articles from a single NewsOrg to an article that is
+  represented by its NPs and VPs.'''
+  NP_synsets = compare_articles.get_synsets_and_ancestors(NPs)
+  VP_synsets = compare_articles.get_synsets_and_ancestors(VPs, NP=False)
+  comparison_articles = news_org(article_topic)
+  comparisons = []
+  for comparison_article in comparison_articles:
+    comparisons.append(
+        compare_articles.compare_articles(NP_to_sentence, VP_to_sentence,
+                                          NPs, VPs,
+                                          NP_synsets, VP_synsets,
+                                          comparison_article))
+  return comparisons
+  '''
+  return compare_articles.compare_to_all_articles(
+      article_body, query_all_news_orgs(article_topic))
+  '''
 
 def query_all_news_orgs(query):
   '''Get the top articles for the given query from all supported news orgs.
@@ -85,7 +110,7 @@ def query_all_news_orgs(query):
       top_articles.extend(news_org.get_query_results(query))
     except TypeError as e:
       logger.log.error('Error getting query results for %s: %s' %
-                       (str(news_org), e))
+                       (news_org, e))
   return top_articles
 
 def url_to_article(url):
