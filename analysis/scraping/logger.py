@@ -1,10 +1,11 @@
 import logging
 import sys
 
-# Log INFO and higher to stdout
-log = logging.getLogger(__name__)
+# Log WARNING and higher to stdout
+log = logging.getLogger('scraping')
 out_hdlr = logging.StreamHandler(sys.stdout)
-out_hdlr.setFormatter(logging.Formatter('%(asctime)s %(message)s'))
-out_hdlr.setLevel(logging.INFO)
+fmt = '[%(asctime)s] %(levelname)s - %(name)s: %(message)s'
+datefmt = '%m/%d/%Y %I:%M:%S %p'
+out_hdlr.setFormatter(logging.Formatter(fmt=fmt, datefmt=datefmt))
+out_hdlr.setLevel(logging.WARNING)
 log.addHandler(out_hdlr)
-log.setLevel(logging.INFO)
