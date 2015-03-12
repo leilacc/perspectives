@@ -55,10 +55,15 @@ class NYTimes(news_interface.NewsOrg):
       headline = helpers.decode(headline)
       body = helpers.decode(body)
       date = helpers.decode(date)
+
+      logger.log.info('URL: %s' % url)
+      logger.log.info('headline: %s' % headline)
+      logger.log.info('Body: %s' % body)
+
       return news_interface.Article(headline, body, url, news_orgs.NY_TIMES,
                                     date)
     except Exception as e:
-      logger.log.info("Hit exception getting article for %s: %s" % (url, e))
+      logger.log.error("Hit exception getting article for %s: %s" % (url, e))
 
   def get_query_results(self, query):
     '''Implementation for getting an article from NYTimes.

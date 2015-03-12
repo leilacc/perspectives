@@ -37,9 +37,14 @@ class BBC(news_interface.NewsOrg):
       paragraphs = article.find_all('p', attrs={'class': None})
       body = helpers.decode(' '.join([p.get_text() for p in paragraphs]))
       date = helpers.decode(soup.find('span', attrs={'class': 'date'}).string)
+
+      logger.log.info('URL: %s' % url)
+      logger.log.info('headline: %s' % headline)
+      logger.log.info('Body: %s' % body)
+
       return news_interface.Article(headline, body, url, news_orgs.BBC, date)
     except Exception as e:
-      logger.log.info("Hit exception getting article for %s: %s" % (url, e))
+      logger.log.error("Hit exception getting article for %s: %s" % (url, e))
 
   def get_query_results(self, query):
     '''Implementation for keyword searches from BBC.
