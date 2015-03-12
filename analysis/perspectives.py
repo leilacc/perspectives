@@ -81,7 +81,7 @@ def get_comparison(news_org, article_topic, NP_to_sentence, VP_to_sentence,
   represented by its NPs and VPs.'''
   NP_synsets = compare_articles.get_synsets_and_ancestors(NPs)
   VP_synsets = compare_articles.get_synsets_and_ancestors(VPs, NP=False)
-  comparison_articles = news_org(article_topic)
+  comparison_articles = news_org.get_query_results(article_topic)
   comparisons = []
   for comparison_article in comparison_articles:
     comparisons.append(
