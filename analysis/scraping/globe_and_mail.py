@@ -3,17 +3,21 @@ import json
 import logging
 import requests
 
-import helpers
-from logger import log
-import news_interface
-import news_orgs
-import api_keys
+from . import helpers
+from . import logger
+from . import news_interface
+from . import news_orgs
 
-logging.basicConfig(filename='globe_and_mail.log', level=logging.WARNING)
+logging.basicConfig(filename='%s/globe_and_mail.log' % logger.cwd,
+                    level=logging.DEBUG,
+                    format=logger.fmt, datefmt=logger.datefmt)
 
 
 class GlobeAndMail(news_interface.NewsOrg):
   '''Methods for interacting with the Globe and Mail website.'''
+
+  def __repr__(self):
+    return news_orgs.GLOBE_AND_MAIL
 
   def get_article(self, url):
     '''Implementation for getting an article from the Globe and Mail.
@@ -22,26 +26,40 @@ class GlobeAndMail(news_interface.NewsOrg):
 
     Returns: The Article representing the article at that url.
     '''
-    html = helpers.get_content(url)
-    if not html:
-      return None
+    try:
+      html = helpers.get_content(url)
+      if not html:
+        return None
 
-    soup = BeautifulSoup(html)
+      soup = BeautifulSoup(html)
 
-    soup.h1.a.extract()
-    headline = soup.h1.get_text().encode('ascii', 'ignore').strip('\n')
-    article = soup.find('div', attrs={'class': 'entry-content'})
+      soup.h1.a.extract()
+      headline = soup.h1.get_text().encode('ascii', 'ignore').strip('\n')
+      article = soup.find('div', attrs={'class': 'entry-content'})
 
-    # Remove other content that is inline with the article text
-    [div.extract() for div in article.find_all('div', attrs={'class': 'entry-related'})]
-    [aside.extract() for aside in article.find_all('aside')]
+      # Remove other content that is inline with the article text
+      [div.extract() for div in
+          article.find_all('div', attrs={'class': 'entry-related'})]
+      [aside.extract() for aside in article.find_all('aside')]
 
-    paragraphs = article.find_all('p', attrs={'class': None})
-    body = ' '.join([p.get_text().encode('ascii', 'ignore') for p in paragraphs])
+      paragraphs = article.find_all('p', attrs={'class': None})
+      body = ' '.join(
+          [p.get_text().encode('ascii', 'ignore') for p in paragraphs])
 
-    log.info(headline)
-    log.info(body)
-    return news_interface.Article(headline, body, url, news_orgs.GLOBE_AND_MAIL)
+      date = soup.find('time').string
+
+      headline = helpers.decode(headline)
+      body = helpers.decode(body)
+      date = helpers.decode(date)
+
+      logger.log.info('URL: %s' % url)
+      logger.log.info('headline: %s' % headline)
+      logger.log.info('Body: %s' % body)
+
+      return news_interface.Article(headline, body, url,
+                                    news_orgs.GLOBE_AND_MAIL, date)
+    except Exception as e:
+      logger.log.error("Hit exception getting article for %s: %s" % (url, e))
 
   def get_query_results(self, query):
     '''Implementation for getting an article from the Globe and Mail.

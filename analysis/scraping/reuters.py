@@ -2,15 +2,21 @@ from bs4 import BeautifulSoup
 import logging
 import requests
 
-import helpers
-from logger import log
-import news_interface
-import news_orgs
+from . import helpers
+from . import logger
+from . import news_interface
+from . import news_orgs
 
-logging.basicConfig(filename='reuters.log', level=logging.WARNING)
+logging.basicConfig(filename='%s/reuters.log' % logger.cwd,
+                    level=logging.DEBUG,
+                    format=logger.fmt, datefmt=logger.datefmt)
+
 
 class Reuters(news_interface.NewsOrg):
   '''Methods for interacting with the REUTERS website.'''
+
+  def __repr__(self):
+    return news_orgs.REUTERS
 
   def get_article(self, url):
     '''Implementation for getting an article from REUTERS.
@@ -19,18 +25,32 @@ class Reuters(news_interface.NewsOrg):
 
     Returns: The Article representing the article at that url.
     '''
-    html = helpers.get_content(url)
-    if not html:
-      return None
+    try:
+      html = helpers.get_content(url)
+      if not html:
+        return None
 
-    soup = BeautifulSoup(html)
-    headline_div = soup.find('div', attrs={'class': 'column1 gridPanel grid8'})
-    headline = helpers.decode(headline_div.h1.string)
-    paragraphs = soup.find('div', attrs={'class': 'column1 gridPanel grid8'}).findAll("p")
-    body = ' '.join([helpers.decode(p.text) for p in paragraphs])
-    log.info(headline)
-    log.info(body)
-    return news_interface.Article(headline, body, url, news_orgs.REUTERS)
+      soup = BeautifulSoup(html)
+      headline_div = soup.find('div',
+                               attrs={'class': 'column1 gridPanel grid8'})
+      headline = helpers.decode(headline_div.h1.string)
+      body = soup.find('span', attrs={'id': 'articleText'}).getText()
+      body = helpers.decode(body)
+
+      date = soup.find('span', attrs={'class': 'timestamp'}).string
+
+      headline = helpers.decode(headline)
+      body = helpers.decode(body)
+      date = helpers.decode(date)
+
+      logger.log.info('URL: %s' % url)
+      logger.log.info('headline: %s' % headline)
+      logger.log.info('Body: %s' % body)
+
+      return news_interface.Article(headline, body, url, news_orgs.REUTERS,
+                                    date)
+    except Exception as e:
+      logger.log.error("Hit exception getting article for %s: %s" % (url, e))
 
   def get_query_results(self, query):
     '''Implementation for keyword searches from REUTERS.

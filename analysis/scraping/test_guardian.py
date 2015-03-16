@@ -15,6 +15,10 @@ class TestGuardian(unittest.TestCase):
     article = self.Guardian.get_article(url)
     self.assertTrue(isinstance(article, news_interface.Article),
         'Expected the result to be an Article instance')
+    self.assertEqual(article.headline,
+                     "Kevin Pietersens England hopes hit again as Surrey rule "
+                     "out return")
+    self.assertEqual(article.date, 'Sunday 25 January 2015')
 
   def test_get_query_results(self):
     query = 'charlie+hebdo'

@@ -3,16 +3,21 @@ import json
 import logging
 import requests
 
-from api_keys import api_keys
-import helpers
-from logger import log
-import news_interface
-import news_orgs
+from . import helpers
+from . import logger
+from . import news_interface
+from . import news_orgs
 
-logging.basicConfig(filename='bbc.log', level=logging.WARNING)
+logging.basicConfig(filename='%s/bbc.log' % logger.cwd,
+                    level=logging.DEBUG,
+                    format=logger.fmt, datefmt=logger.datefmt)
+
 
 class BBC(news_interface.NewsOrg):
   '''Methods for interacting with the BBC website.'''
+
+  def __repr__(self):
+    return news_orgs.BBC
 
   def get_article(self, url):
     '''Implementation for getting an article from BBC.
@@ -21,18 +26,25 @@ class BBC(news_interface.NewsOrg):
 
     Returns: The Article representing the article at that url.
     '''
-    html = helpers.get_content(url)
-    if not html:
-      return None
+    try:
+      html = helpers.get_content(url)
+      if not html:
+        return None
 
-    soup = BeautifulSoup(html)
-    headline = soup.h1.string
-    article = soup.find('div', attrs={'class': 'story-body'})
-    paragraphs = article.find_all('p', attrs={'class': None})
-    body = ' '.join([p.get_text() for p in paragraphs])
-    log.info(headline)
-    log.info(body)
-    return news_interface.Article(headline, body, url, news_orgs.BBC)
+      soup = BeautifulSoup(html)
+      headline = helpers.decode(soup.h1.string)
+      article = soup.find('div', attrs={'class': 'story-body'})
+      paragraphs = article.find_all('p', attrs={'class': None})
+      body = helpers.decode(' '.join([p.get_text() for p in paragraphs]))
+      date = helpers.decode(soup.find('span', attrs={'class': 'date'}).string)
+
+      logger.log.info('URL: %s' % url)
+      logger.log.info('headline: %s' % headline)
+      logger.log.info('Body: %s' % body)
+
+      return news_interface.Article(headline, body, url, news_orgs.BBC, date)
+    except Exception as e:
+      logger.log.error("Hit exception getting article for %s: %s" % (url, e))
 
   def get_query_results(self, query):
     '''Implementation for keyword searches from BBC.

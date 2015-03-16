@@ -1,6 +1,7 @@
 '''Get perspectives from different articles.'''
 
-from scraping import logger
+import futures
+import json
 import re
 
 import compare_articles
@@ -8,6 +9,9 @@ import extract_keywords
 from scraping import aljazeera, bbc, cbc, cnn, globe_and_mail, guardian, \
                      huff_post, jpost, ny_post, ny_times, reuters, \
                      russia_today, times_of_israel, todays_zaman, usa_today
+from scraping import logger
+
+NUM_CONCURRENT = 200
 
 AL_JAZEERA = aljazeera.AlJazeera()
 BBC = bbc.BBC()
@@ -46,9 +50,50 @@ def get_perspectives(url):
   '''
   article = url_to_article(url)
   if article:
-    article_topic = extract_keywords.extract_keywords(article.headline)
-    related_articles = query_all_news_orgs(article_topic)
-    return compare_articles.compare.to_all_articles(article, related_articles)
+    headline = article.headline
+    body = article.body
+    article_topic = extract_keywords.extract_keywords(headline)
+
+    NP_to_sentence = compare_articles.get_NPs(body)
+    NPs = set(NP_to_sentence.keys())
+
+    VP_to_sentence = compare_articles.get_VPs(body)
+    VPs = set(VP_to_sentence.keys())
+
+    n = len(NEWS_ORGS)
+    with futures.ProcessPoolExecutor(max_workers=n) as executor:
+      comparisons = executor.map(get_comparison, NEWS_ORGS, [article_topic]*n,
+                                 [NP_to_sentence]*n, [VP_to_sentence]*n,
+                                 [NPs]*n, [VPs]*n,
+                                 [1]*n)
+      return json.dumps(list(comparisons))
+    #return json.dumps(get_comparison(1,article_topic,1,1,1,1,1,1, article.body))
+  else:
+    return json.dumps("Not a recognized article")
+
+def test_args(n, k, j, l, m, q, o, t, r):
+  return []
+
+
+def get_comparison(news_org, article_topic, NP_to_sentence, VP_to_sentence,
+                   NPs, VPs, article_body):
+  '''Compares the articles from a single NewsOrg to an article that is
+  represented by its NPs and VPs.'''
+  NP_synsets = compare_articles.get_synsets_and_ancestors(NPs)
+  VP_synsets = compare_articles.get_synsets_and_ancestors(VPs, NP=False)
+  comparison_articles = news_org.get_query_results(article_topic)
+  comparisons = []
+  for comparison_article in comparison_articles:
+    comparisons.append(
+        compare_articles.compare_articles(NP_to_sentence, VP_to_sentence,
+                                          NPs, VPs,
+                                          NP_synsets, VP_synsets,
+                                          comparison_article))
+  return comparisons
+  '''
+  return compare_articles.compare_to_all_articles(
+      article_body, query_all_news_orgs(article_topic))
+  '''
 
 def query_all_news_orgs(query):
   '''Get the top articles for the given query from all supported news orgs.
@@ -65,7 +110,7 @@ def query_all_news_orgs(query):
       top_articles.extend(news_org.get_query_results(query))
     except TypeError as e:
       logger.log.error('Error getting query results for %s: %s' %
-                       (str(news_org), e))
+                       (news_org, e))
   return top_articles
 
 def url_to_article(url):
@@ -78,39 +123,36 @@ def url_to_article(url):
     The Article that is scraped from url, if the url corresponds to an article
     on a supported news org page. Otherwise, None.
   '''
-  try:
-    if re.search(r'.*aljazeera\.com/((opinions)|(articles)|(news))/.+', url):
-      return AL_JAZEERA.get_article(url)
-    elif re.search(r'.*bbc\..+', url):
-      return BBC.get_article(url)
-    elif re.search(r'.*cbc\.ca/news/.+', url):
-      return CBC.get_article(url)
-    elif re.search(r'.*cnn\.com/.+', url):
-      return CNN.get_article(url)
-    elif re.search(r'.*theglobeandmail\.com/.+', url):
-      return GLOBE_AND_MAIL.get_article(url)
-    elif re.search(r'.*theguardian\.com/.+', url):
-      return GUARDIAN.get_article(url)
-    elif re.search(r'.*huffingtonpost\.c.+/.+', url):
-      return HUFF_POST.get_article(url)
-    elif re.search(r'.*jpost\.com/.+', url):
-      return JPOST.get_article(url)
-    elif re.search(r'.*nypost\.com/.+', url):
-      return NY_POST.get_article(url)
-    elif re.search(r'.*nytimes\.com/.+', url):
-      return NY_TIMES.get_article(url)
-    elif re.search(r'.*reuters\.com/.+', url):
-      return REUTERS.get_article(url)
-    elif re.search(r'.*rt\.com/.+', url):
-      return RT.get_article(url)
-    elif re.search(r'.*timesofisrael\.com/.+', url):
-      return TIMES_OF_ISRAEL.get_article(url)
-    elif re.search(r'.*todayszaman\.com/.+', url):
-      return TODAYS_ZAMAN.get_article(url)
-    elif re.search(r'.*usatoday\.com/story/.+', url):
-      return USA_TODAY.get_article(url)
-    else:
-      logger.log.info("Didn't regexp match for %s" % url)
-  except Exception as e:
-    logger.log.info("Hit exception getting article for %s: %s" % (url, e))
+  if re.search(r'.*aljazeera\.com/((opinions)|(articles)|(news))/.+', url):
+    return AL_JAZEERA.get_article(url)
+  elif re.search(r'.*bbc\..+', url):
+    return BBC.get_article(url)
+  elif re.search(r'.*cbc\.ca/news/.+', url):
+    return CBC.get_article(url)
+  elif re.search(r'.*cnn\.com/.+', url):
+    return CNN.get_article(url)
+  elif re.search(r'.*theglobeandmail\.com/.+', url):
+    return GLOBE_AND_MAIL.get_article(url)
+  elif re.search(r'.*theguardian\.com/.+', url):
+    return GUARDIAN.get_article(url)
+  elif re.search(r'.*huffingtonpost\.c.+/.+', url):
+    return HUFF_POST.get_article(url)
+  elif re.search(r'.*jpost\.com/.+', url):
+    return JPOST.get_article(url)
+  elif re.search(r'.*nypost\.com/.+', url):
+    return NY_POST.get_article(url)
+  elif re.search(r'.*nytimes\.com/.+', url):
+    return NY_TIMES.get_article(url)
+  elif re.search(r'.*reuters\.com/.+', url):
+    return REUTERS.get_article(url)
+  elif re.search(r'.*rt\.com/.+', url):
+    return RT.get_article(url)
+  elif re.search(r'.*timesofisrael\.com/.+', url):
+    return TIMES_OF_ISRAEL.get_article(url)
+  elif re.search(r'.*todayszaman\.com/.+', url):
+    return TODAYS_ZAMAN.get_article(url)
+  elif re.search(r'.*usatoday\.com/story/.+', url):
+    return USA_TODAY.get_article(url)
+  else:
+    logger.log.info("Didn't regexp match for %s" % url)
     return None

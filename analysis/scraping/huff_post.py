@@ -3,16 +3,22 @@ import json
 import logging
 import requests
 
-import helpers
-from logger import log
-import news_interface
-import news_orgs
-import api_keys
+from . import api_keys
+from . import helpers
+from . import logger
+from . import news_interface
+from . import news_orgs
 
-logging.basicConfig(filename='huff_post.log', level=logging.WARNING)
+logging.basicConfig(filename='%s/huff_post.log' % logger.cwd,
+                    level=logging.DEBUG,
+                    format=logger.fmt, datefmt=logger.datefmt)
+
 
 class HuffPost(news_interface.NewsOrg):
   '''Methods for interacting with the Huffington Post website/API.'''
+
+  def __repr__(self):
+    return news_orgs.HUFF_POST
 
   def get_article(self, url):
     '''Implementation for getting an article from Huffington Post.
@@ -23,17 +29,30 @@ class HuffPost(news_interface.NewsOrg):
     Returns:
       The Article representing the article at that url.
     '''
-    html = helpers.get_content(url)
-    if not html:
-      return None
+    try:
+      html = helpers.get_content(url)
+      if not html:
+        return None
 
-    soup = BeautifulSoup(html)
-    headline = soup.h1.string
-    article = soup.find('article', attrs={'class': 'entry'})
-    paragraphs = article.find_all('p', attrs={'class': None})
-    body = ' '.join([p.get_text() for p in paragraphs])
-    log.info(body)
-    return news_interface.Article(headline, body, url, news_orgs.HUFF_POST)
+      soup = BeautifulSoup(html)
+      headline = soup.h1.string
+      article = soup.find('article', attrs={'class': 'entry'})
+      paragraphs = article.find_all('p', attrs={'class': None})
+      body = ' '.join([p.get_text() for p in paragraphs])
+      date = soup.find('span', attrs={'class': 'posted'}).find('time').string
+
+      headline = helpers.decode(headline)
+      body = helpers.decode(body)
+      date = helpers.decode(date)
+
+      logger.log.info('URL: %s' % url)
+      logger.log.info('headline: %s' % headline)
+      logger.log.info('Body: %s' % body)
+
+      return news_interface.Article(headline, body, url, news_orgs.HUFF_POST,
+                                    date)
+    except Exception as e:
+      logger.log.error("Hit exception getting article for %s: %s" % (url, e))
 
   def get_query_results(self, query):
     '''Implementation for keyword searches from Huffington Post.
@@ -51,9 +70,9 @@ class HuffPost(news_interface.NewsOrg):
     article_urls = [res['url'] for res in results]
 
     top_articles = []
-    for url in article_urls:
+    for url in article_urls[0:news_interface.NUM_ARTICLES]:
       if url.endswith('.html'):
         # Huff Post sometimes returns aggregator pages that don't
         # contain an article and don't end in .html
         top_articles.append(self.get_article(url))
-    return top_articles[0:news_interface.NUM_ARTICLES]
+    return top_articles

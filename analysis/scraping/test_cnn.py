@@ -15,6 +15,8 @@ class TestCNN(unittest.TestCase):
     article = self.CNN.get_article(url)
     self.assertTrue(isinstance(article, news_interface.Article),
         'Expected the result to be an Article instance')
+    self.assertEqual(article.headline, 'ISIS: Japanese hostage beheaded')
+    self.assertEqual(article.date, 'Updated 4:58 PM ET, Tue February 3, 2015')
 
   def test_get_query_results(self):
     query = 'charlie+hebdo'

@@ -1,27 +1,26 @@
-import logging
 import unittest
 
-from logger import log
 import news_interface
-import reuters
+import todays_zaman
 
-class TestReuters(unittest.TestCase):
+class TestTodaysZaman(unittest.TestCase):
 
   def setUp(self):
-    self.REUTERS = reuters.Reuters()
+    self.TodaysZaman = todays_zaman.TodaysZaman()
 
-  def test_get_article(self):
-    url = 'http://www.reuters.com/article/2015/03/04/cnews-us-ukraine-crisis-mine-blast-idCAKBN0M00KR20150304'
-    article = self.REUTERS.get_article(url)
+  def test_get_article_news(self):
+    url = 'http://www.todayszaman.com/national_turkish-jetliner-skids-off-on-runway-in-kathmandu-passengers-safe_374261.html'
+    article = self.TodaysZaman.get_article(url)
     self.assertTrue(isinstance(article, news_interface.Article),
         'Expected the result to be an Article instance')
     self.assertEqual(article.headline,
-                     "Thirty-three miners dead after pit blast in east Ukraine")
-    self.assertEqual(article.date, 'Wed Mar 4, 2015 3:23pm EST')
+                     "Turkish jetliner skids off on runway in Kathmandu, "
+                     "passengers safe")
+    self.assertEqual(article.date, 'March 04, 2015, Wednesday/ 11:10:46/')
 
   def test_get_query_results(self):
     query = 'charlie+hebdo'
-    res = self.REUTERS.get_query_results(query)
+    res = self.TodaysZaman.get_query_results(query)
     self.assertEqual(len(res), news_interface.NUM_ARTICLES,
         'Expected %d articles' % news_interface.NUM_ARTICLES)
     self.assertTrue(isinstance(res[0], news_interface.Article),

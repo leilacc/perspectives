@@ -1,17 +1,22 @@
 from bs4 import BeautifulSoup
 import logging
 import requests
-import urllib2
 
-import helpers
-from logger import log
-import news_interface
-import news_orgs
+from . import helpers
+from . import logger
+from . import news_interface
+from . import news_orgs
 
-logging.basicConfig(filename='jpost.log', level=logging.WARNING)
+logging.basicConfig(filename='%s/jpost.log' % logger.cwd,
+                    level=logging.DEBUG,
+                    format=logger.fmt, datefmt=logger.datefmt)
+
 
 class JPost(news_interface.NewsOrg):
   '''Methods for interacting with the JPOST website.'''
+
+  def __repr__(self):
+    return news_orgs.JPOST
 
   def get_article(self, url):
     '''Implementation for getting an article from JPost.
@@ -22,25 +27,35 @@ class JPost(news_interface.NewsOrg):
     Returns:
       The Article representing the article at that url.
     '''
-    html = helpers.get_content(url)
-    if not html:
-      return None
-
-    soup = BeautifulSoup(html)
-
     try:
-      a = soup.find('h1', attrs={'class': 'article-title'})
-      headline = a.text.strip().strip('\r\n')
-      paragraphs = soup.find("div", {"class": "article-text"})
-      article = paragraphs.find("p")
+      html = helpers.get_content(url)
+      if not html:
+        return None
+
+      soup = BeautifulSoup(html)
+
+      try:
+        a = soup.find('h1', attrs={'class': 'article-title'})
+        headline = a.text.strip().strip('\r\n')
+        paragraphs = soup.find("div", {"class": "article-text"})
+        article = paragraphs.find("p")
+        date = soup.find('p', attrs={'class': 'article-date-time'}).string
+      except Exception as e:
+        logger.log.error('Error scraping JPost article at %s: %s' % (url, e))
+
+      body = article.text
+
+      headline = helpers.decode(headline)
+      body = helpers.decode(body)
+      date = helpers.decode(date)
+
+      logger.log.info('URL: %s' % url)
+      logger.log.info('headline: %s' % headline)
+      logger.log.info('Body: %s' % body)
+
+      return news_interface.Article(headline, body, url, news_orgs.JPOST, date)
     except Exception as e:
-      log.error('Error scraping JPost article at %s: %s' % (url, e))
-
-    body = article.text
-
-    log.info(headline)
-    log.info(body)
-    return news_interface.Article(headline, body, url, news_orgs.JPOST)
+      logger.log.error("Hit exception getting article for %s: %s" % (url, e))
 
   def get_query_results(self, query):
     '''Implementation for keyword searches from JPost.
@@ -61,3 +76,4 @@ class JPost(news_interface.NewsOrg):
     top_articles = []
     for url in article_urls[0:news_interface.NUM_ARTICLES]:
       top_articles.append(self.get_article(url))
+    return top_articles

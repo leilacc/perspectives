@@ -2,18 +2,21 @@ from bs4 import BeautifulSoup
 import logging
 import requests
 
-import helpers
-from logger import log
-import news_interface
-import news_orgs
+from . import helpers
+from . import logger
+from . import news_interface
+from . import news_orgs
 
-import urllib2
+logging.basicConfig(filename='%s/todays_zaman.log' % logger.cwd,
+                    level=logging.DEBUG,
+                    format=logger.fmt, datefmt=logger.datefmt)
 
-
-logging.basicConfig(filename='todays_zaman.log', level=logging.WARNING)
 
 class TodaysZaman(news_interface.NewsOrg):
   '''Methods for interacting with the Todays Zaman website.'''
+
+  def __repr__(self):
+    return news_orgs.TODAYS_ZAMAN
 
   def get_article(self, url):
     '''Implementation for getting an article from Todays Zaman.
@@ -24,19 +27,32 @@ class TodaysZaman(news_interface.NewsOrg):
     Returns:
       The Article representing the article at that url.
     '''
-    html = helpers.get_content(url)
-    if not html:
-      return None
+    try:
+      html = helpers.get_content(url)
+      if not html:
+        return None
 
-    soup = BeautifulSoup(html)
-    a = soup.find("title")
-    headline = helpers.decode(a.text)
-    paragraphs = soup.find("div", {"id": "newsText"})
-    article = paragraphs.findAll("p")
-    body = ' '.join([helpers.decode(p.text) for p in article])
-    log.info(headline)
-    log.info(body)
-    return news_interface.Article(headline, body, url, news_orgs.TODAYS_ZAMAN)
+      soup = BeautifulSoup(html)
+      a = soup.find("title")
+      headline = helpers.decode(a.text)
+      paragraphs = soup.find("div", {"id": "newsText"})
+      article = paragraphs.findAll("p")
+      body = ' '.join([helpers.decode(p.text) for p in article])
+      dateDiv = soup.find('div', attrs={'class': 'pageNewsDetailDate'})
+      date = dateDiv.contents[1].getText()
+
+      headline = helpers.decode(headline)
+      body = helpers.decode(body)
+      date = helpers.decode(date)
+
+      logger.log.info('URL: %s' % url)
+      logger.log.info('headline: %s' % headline)
+      logger.log.info('Body: %s' % body)
+
+      return news_interface.Article(headline, body, url, news_orgs.TODAYS_ZAMAN,
+                                    date)
+    except Exception as e:
+      logger.log.error("Hit exception getting article for %s: %s" % (url, e))
 
   def get_query_results(self, query):
     '''Implementation for keyword searches from Todays Zaman.
@@ -61,4 +77,3 @@ class TodaysZaman(news_interface.NewsOrg):
       top_articles.append(self.get_article(url))
 
     return top_articles
-

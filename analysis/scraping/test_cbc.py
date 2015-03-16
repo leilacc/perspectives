@@ -15,6 +15,10 @@ class TestCBC(unittest.TestCase):
     article = self.CBC.get_article(url)
     self.assertTrue(isinstance(article, news_interface.Article),
         'Expected the result to be an Article instance')
+    self.assertEqual(article.headline,
+                     'Greek election: Left-wing Syriza party wins but number '
+                     'of seats in question')
+    self.assertEqual(article.date, 'Posted: Jan 25, 2015 12:54 AM ET')
 
   def test_get_query_results(self):
     query = 'charlie+hebdo'

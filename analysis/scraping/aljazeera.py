@@ -2,17 +2,22 @@ from bs4 import BeautifulSoup
 import json
 import logging
 import requests
-import urllib2
 
-import helpers
-from logger import log
-import news_interface
-import news_orgs
+from . import helpers
+from . import logger
+from . import news_interface
+from . import news_orgs
 
-logging.basicConfig(filename='aljazeera.log', level=logging.WARNING)
+logging.basicConfig(filename='%s/aljazeera.log' % logger.cwd,
+                    level=logging.DEBUG,
+                    format=logger.fmt, datefmt=logger.datefmt)
+
 
 class AlJazeera(news_interface.NewsOrg):
   '''Methods for interacting with the Al Jazeera website.'''
+
+  def __repr__(self):
+    return news_orgs.ALJAZEERA
 
   def get_article(self, url):
     '''Implementation for getting an article from Al Jazeera.
@@ -24,37 +29,53 @@ class AlJazeera(news_interface.NewsOrg):
       The Article representing the article at that url, or None if unable to
       get the Article.
     '''
-    html = helpers.get_content(url)
-    if not html:
-      return None
-
-    soup = BeautifulSoup(html)
-
-    headline = None
-    potential_classes = ["heading-story", "articleOpinion-title"]
-    for h1_class in potential_classes:
-      try:
-        headline = soup.find("h1", {"class": h1_class}).string
-        break
-      except AttributeError:
-        continue
-    if not headline:
-      log.error('Exception trying to scrape Al Jazeera headline from %s'
-                % (url))
-      return None
-
-    headline = helpers.decode(headline)
-
     try:
-      paragraphs = soup.find("div", {"class": "article-body"})
-      article = paragraphs.findAll("p")
-    except AttributeError:
-      paragraphs = soup.find("div", {"class": "text"})
-      article = paragraphs.findAll("p")
-    body = ' '.join([helpers.decode(p.text) for p in article])
-    #log.info(headline)
-    #log.info(body)
-    return news_interface.Article(headline, body, url, news_orgs.ALJAZEERA)
+      html = helpers.get_content(url)
+      if not html:
+        return None
+
+      soup = BeautifulSoup(html)
+
+      headline = None
+      potential_classes = ["heading-story", "articleOpinion-title"]
+      for h1_class in potential_classes:
+        try:
+          headline = soup.find("h1", {"class": h1_class}).string
+          break
+        except AttributeError:
+          continue
+      if not headline:
+        logger.log.error(
+            'Exception trying to scrape Al Jazeera headline from %s' % (url))
+        return None
+
+      headline = helpers.decode(headline)
+
+      try:
+        paragraphs = soup.find("div", {"class": "article-body"})
+        article = paragraphs.findAll("p")
+      except AttributeError:
+        paragraphs = soup.find("div", {"class": "text"})
+        article = paragraphs.findAll("p")
+      body = ' '.join([helpers.decode(p.text) for p in article])
+
+      try:
+        date = soup.find("time").string
+      except AttributeError:
+        date = soup.find("span", {"class": "date"}).string
+
+      headline = helpers.decode(headline)
+      body = helpers.decode(body)
+      date = helpers.decode(date)
+
+      logger.log.info('URL: %s' % url)
+      logger.log.info('headline: %s' % headline)
+      logger.log.info('Body: %s' % body)
+
+      return news_interface.Article(headline, body, url, news_orgs.ALJAZEERA,
+                                    date)
+    except Exception as e:
+      logger.log.error("Hit exception getting article for %s: %s" % (url, e))
 
   def get_query_results(self, query):
     '''Implementation for keyword searches from Al Jazeera.
@@ -71,8 +92,7 @@ class AlJazeera(news_interface.NewsOrg):
     json_res = json.loads(json_res)['results']
     article_urls = [result['url'] for result in json_res]
     top_articles = []
-    for url in article_urls:
-      log.info(url)
+    for url in article_urls[0:news_interface.NUM_ARTICLES]:
       if 'topics' not in url and 'blogs' not in url: # not an article page
         top_articles.append(self.get_article(url))
-    return top_articles[0:news_interface.NUM_ARTICLES]
+    return top_articles

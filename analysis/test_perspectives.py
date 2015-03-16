@@ -13,6 +13,11 @@ class TestPerspectives(unittest.TestCase):
     self.assertTrue(len(compared_articles) > 10)
     self.assertTrue(compared_articles[0]['sentences'])
 
+  def test_get_perspectives_non_article(self):
+    url = 'http://facebook.com/'
+    res = json.loads(perspectives.get_perspectives(url))
+    self.assertEqual(res, 'Not a recognized article')
+
   def test_query_all_news_orgs(self):
     query = 'charlie+hebdo'
     articles = perspectives.query_all_news_orgs(query)
@@ -43,7 +48,7 @@ class TestPerspectives(unittest.TestCase):
 
   def test_url_to_article_cnn(self):
     url = 'http://www.cnn.com/2015/01/31/entertainment/taiwan-scorcese-movie-set-accident/index.html'
-    headline = "One killed, 2 injured on set of Martin Scorsese's movie 'Silence' "
+    headline = "One killed, 2 injured on set of Martin Scorsese's movie 'Silence'"
     self._test_url_to_article(url, headline)
 
   def test_url_to_article_globe_and_mail(self):
@@ -68,7 +73,7 @@ class TestPerspectives(unittest.TestCase):
 
   def test_url_to_article_ny_post(self):
     url = 'http://nypost.com/2015/01/31/why-picking-a-super-bowl-side-is-such-a-nightmare/'
-    headline = "Why picking a Super Bowl side is such anightmare"
+    headline = "Why picking a Super Bowl side is such a nightmare"
     self._test_url_to_article(url, headline)
 
   def test_url_to_article_ny_times(self):
@@ -88,7 +93,7 @@ class TestPerspectives(unittest.TestCase):
 
   def test_url_to_article_times_of_israel(self):
     url = 'http://www.timesofisrael.com/in-super-bowl-matchup-pats-have-israel-connections-cornered/'
-    headline = "In Super Bowl matchup, Pats have Israel connections cornered"
+    headline = "In Super Bowl matchup, Pats have Israel connections covered"
     self._test_url_to_article(url, headline)
 
   def test_url_to_article_todays_zaman(self):

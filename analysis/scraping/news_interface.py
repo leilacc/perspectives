@@ -1,6 +1,6 @@
 import sys
 
-NUM_ARTICLES = 3
+NUM_ARTICLES = 2
 
 def _functionId(obj, nFramesUp):
     '''Create a string naming the function n frames up on the stack.'''
@@ -14,6 +14,10 @@ def abstractMethod(obj=None):
 
 class NewsOrg:
   '''Represents a news organization.'''
+
+  def __repr__(self):
+    '''Representation of the NewsOrg.'''
+    abstractMethod(self)
 
   def get_article(self, url):
     '''Return an Article representing the article at url.'''
@@ -29,18 +33,32 @@ class NewsOrg:
 class Article:
   '''Represents an article.'''
 
-  def __init__(self, headline, body, link, news_org):
+  def __init__(self, headline, body, link, news_org, date):
     '''Initialize the article's properties.
 
     headline: str
     body: str
     link: str
-    news_org: int. See the macros in api_keys
+    news_org: str. See the macros in api_keys
+    date: str, unaltered from scraping
     '''
     self.headline = headline
     self.body = body
     self.link = link
     self.news_org = news_org
+    self.date = date
+
+  def __repr__(self):
+    '''Representation of the article.'''
+    return ('----------------------------------------------------------------\n'
+            'ARTICLE\n'
+            'Org: %s\n'
+            'Headline: %s...\n'
+            'Date: %s\n'
+            'Body: %s...\n'
+            'Link: %s\n'
+            % (self.news_org, self.headline[0:66], self.date,
+               self.body[0:70], self.link))
 
   def to_dict(self):
     '''Return the Article represented in dictionary form.
@@ -54,5 +72,6 @@ class Article:
     article_dict["body"] = self.body
     article_dict["link"] = self.link
     article_dict["news_org"] = self.news_org
+    article_dict["date"] = self.date
     return article_dict
 

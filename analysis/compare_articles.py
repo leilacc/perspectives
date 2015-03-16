@@ -128,15 +128,6 @@ def get_synsets(np1, np2):
     return
   return (synsets1, synsets2)
 
-def determine_if_related(np1, np2):
-  syn1 = get_synset(np1)
-  syn2 = get_synset(np2)
-
-  if syn1 and syn2 and syn1.max_depth() > 5 and syn2.max_depth() > 5:
-    lch = syn1.lowest_common_hypernyms(syn2)[0]
-    if lch not in [syn1, syn2] and synset_distance(syn1, [lch]) + synset_distance(syn2, [lch]) < 5:
-      return (syn1, syn2)
-
 def synset_distance(hypo, hyper):
   if hypo in hyper:
     return 0
@@ -151,97 +142,137 @@ def get_ancestors(synset):
     ancestors.extend(get_ancestors(hypernym))
   return ancestors
 
-def get_sentence(np, string):
-  matching_sentences = []
-  for sentence in string.split('.'):
-    tokens = nltk.word_tokenize(sentence)
-    tagged_tokens = nltk.pos_tag(tokens)
-    tree = NpChunker.parse(tagged_tokens)
-    for child in tree:
-      if type(child) == nltk.Tree and child.node == 'NP':
-        leaves = child.leaves()
-        if np in ' '.join([lemmatize(leaf[0], 'n') for leaf in leaves]):
-          matching_sentences.append(sentence)
-  return matching_sentences
-
-def get_tree(sentence):
-    tokens = nltk.word_tokenize(sentence)
-    tagged_tokens = nltk.pos_tag(tokens)
-    return NpChunker.parse(tagged_tokens)
-
-def compare_articles(article1, article2):
-    text_NPs = get_NPs(article1.body)
-    article1_NPs = set(text_NPs.keys())
-    text_VPs = get_VPs(article1.body)
-    article1_VPs = set(text_VPs.keys())
-
-    text_NPs = get_NPs(article2.body)
-    article2_NPs = set(text_NPs.keys())
-    diff_NPs = article2_NPs.difference(article1_NPs)
-    text_VPs = get_VPs(article2.body)
-    article2_VPs = set(text_VPs.keys())
-    diff_VPs = article2_VPs.difference(article1_VPs)
-
-    syns1 = []
-    for np in article1_NPs:
-      synset = get_synset(np)
-      if synset:
-        syns1.append(synset)
-        syns1.extend(get_ancestors(synset))
-
-    sentences = {}
-    for np in diff_NPs:
-      np = np.encode('utf-8')
-      synset = get_synset(np)
-      if synset:
-        distance = synset_distance(synset, syns1)
-        if distance > 3:
-          sentence = text_NPs[np][0].strip() + '.'
-          if sentence in sentences:
-            sentences[sentence] = sentences[sentence].replace(np, '**%s**' % np)
-          else:
-            sentences[sentence] = sentence.replace(np, '**%s**' % np)
-
-    syns1 = []
-    for vp in article1_VPs:
-      syn = wn.synsets(vp, 'v')
-      if syn:
-        syn = syn[0]
-        syns1.append(syn)
-        syns1.extend(get_ancestors(syn))
-
-    for verb in diff_VPs:
-      verb = verb.encode('utf-8')
-      syn = wn.synsets(verb, 'v')
-      if syn:
-        syn = syn[0]
-        distance = synset_distance(syn, syns1)
-        if distance > 5 and distance != float("inf"):
-          sentence = text_VPs[verb][0].encode('utf-8').strip() + '.'
-          if sentence in sentences:
-            sentences[sentence] = sentences[sentence].replace(verb, '**%s**' % verb)
-          else:
-            sentences[sentence] = sentence.replace(verb, '**%s**' % verb)
-
-    return sentences.values()
-
-def compare_to_all_articles(article, comparison_articles):
-  '''Compares article to the comparison_articles.
+def get_synsets_and_ancestors(phrases, NP=True):
+  '''Returns a list of synsets in phrases, and their ancestors.
 
   Args:
-    article: an Article
-    comparison_articles: a list of Articles to be compared to Article
+    phrases: A list of phrases (NPs or VPs).
+
+  Returns:
+    A list of the synsets contained in phrases, and their ancestors.
+  '''
+  synsets = []
+  for phrase in phrases:
+    if phrase:
+      synset = get_synset(phrase)
+    else:
+      synset = wn.synsets(phrase, 'v')
+
+    if synset:
+      synsets.append(synset)
+      synsets.extend(get_ancestors(synset))
+
+  return synsets
+
+def highlight_sentence(highlighted_sentences, phrases, key):
+  sentence = phrases[key][0].encode('utf-8').strip() + '.'
+  if sentence in highlighted_sentences:
+    highlighted_sentences[sentence] = highlighted_sentences[sentence].replace(
+                                        key, '**%s**' % key)
+  else:
+    highlighted_sentences[sentence] = sentence.replace(key, '**%s**' % key)
+  return highlighted_sentences
+
+def check_distances(diff, comparison_synsets, phrase_to_sentence,
+                    highlighted_sentences, NP=True):
+  '''Checks the distance from each NP in diff to the comparison_synsets and
+  adds the corresponsing sentence from NP_to_sentence to highlighted_sentences
+  if the distance is great enough.
+
+  diff: A list of noun or verb phrases.
+  comparison_synsets: A list of noun or verb synsets.
+  phrase_to_sentence: An NP or VP to sentence dictionary.
+  highlighted_sentences: A dict of sentences to their highlighted versions.
+  NP: True if the phrases are noun phrases, False if they are verb phrases.
+
+  Returns: None, but alters highlighted_sentences.
+  '''
+  for phrase in diff:
+    phrase = phrase.encode('utf-8')
+    if NP:
+      synset = get_synset(phrase)
+    else:
+      synset = wn.synsets(phrase, 'v')
+      if synset:
+        synset = synset[0]
+
+    if synset:
+      distance = synset_distance(synset, comparison_synsets)
+      if distance > 4 and distance != float("inf"):
+        highlight_sentence(highlighted_sentences, phrase_to_sentence, phrase)
+
+def compare_articles(a1_NP_to_sentence, a1_VP_to_sentence,
+                     a1_NPs, a1_VPs,
+                     a1_NP_synsets, a1_VP_synsets,
+                     comparison_article):
+  '''Compares the noun and verb phrases of article a1 to a comparison_article.
+
+  Args:
+    a1_NP_to_sentence: A dict of each noun phrase in article 1 to the sentence
+      that contains it.
+    a1_VP_to_sentence: A dict of each verb phrase in article 1 to the sentence
+      that contains it.
+    a1_NPs: A list of every noun phrase in article 1.
+    a1_VPs: A list of every verb phrase in article 1.
+    a1_NP_synsets: A list of all the noun synsets and their ancestors from
+      article 1.
+    a1_VP_synsets: A list of all the verb synsets and their ancestors from
+      article 1.
+    comparison_article: the Article to be compared to article 1.
+
+  Returns:
+    A json-encoded list of sentences from comparison_article that
+    contain semantic concepts very different from the article a1.
+  '''
+  a2_NP_to_sentence = get_NPs(comparison_article.body)
+  a2_VP_to_sentence = get_VPs(comparison_article.body)
+
+  a2_NPs = set(a2_NP_to_sentence)
+  a2_VPs = set(a2_VP_to_sentence)
+
+  diff_NPs = a2_NPs.difference(a1_NPs)
+  diff_VPs = a2_VPs.difference(a1_VPs)
+
+  highlighted_sentences = {}
+  check_distances(diff_NPs, a1_NP_synsets, a2_NP_to_sentence,
+                  highlighted_sentences)
+  check_distances(diff_VPs, a1_VP_synsets, a2_VP_to_sentence,
+                  highlighted_sentences, NP=False)
+
+  comparison_results = comparison_article.to_dict()
+  comparison_results['sentences'] = highlighted_sentences.values()
+  if comparison_results['sentences']:
+    return json.dumps(comparison_results)
+  else:
+    return None
+
+def compare_to_all_articles(article_body, comparison_articles):
+  '''Compares article to the comparison_articles.
+  TODO: Deprecate this in favour of parallel comparisons.
+
+  Args:
+    article_body: string, the body of an Article
+    comparison_articles: a list of Articles to be compared to the article_body
 
   Returns:
     The list of comparison_articles in JSON format, with a 'sentences'
     attribute containing a list of sentences with different facts from the
     original article.
-    '''
+  '''
+  articleNPs = get_NPs(article_body)
+  NPs = set(articleNPs.keys())
+  NP_synsets = get_synsets_and_ancestors(articleNPs)
+
+  articleVPs = get_VPs(article_body)
+  VPs = set(articleVPs.keys())
+  VP_synsets = get_synsets_and_ancestors(articleVPs, NP=False)
+
   all_results = []
   for comparison_article in comparison_articles:
     if comparison_article:
       comparison_results = comparison_article.to_dict()
-      comparison_results['sentences'] = compare_articles(article,
-                                                         comparison_article)
+      comparison_results['sentences'] = compare_articles(
+          articleNPs, articleVPs, NPs, VPs, NP_synsets, VP_synsets,
+          comparison_article)
       all_results.append(comparison_results)
   return json.dumps(all_results)

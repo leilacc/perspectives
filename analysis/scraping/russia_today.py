@@ -2,17 +2,21 @@ from bs4 import BeautifulSoup
 import logging
 import requests
 
-from api_keys import api_keys
-import helpers
-from logger import log
-import news_interface
-import news_orgs
+from . import helpers
+from . import logger
+from . import news_interface
+from . import news_orgs
 
-logging.basicConfig(filename='russia_today.log', level=logging.WARNING)
+logging.basicConfig(filename='%s/russia_today.log' % logger.cwd,
+                    level=logging.DEBUG,
+                    format=logger.fmt, datefmt=logger.datefmt)
 
 
 class RussiaToday(news_interface.NewsOrg):
   '''Methods for interacting with the RussiaToday website/API.'''
+
+  def __repr__(self):
+    return news_orgs.RUSSIA_TODAY
 
   def get_article(self, url):
     '''Implementation for getting an article from the Russia Today.
@@ -21,24 +25,36 @@ class RussiaToday(news_interface.NewsOrg):
 
     Returns: The Article representing the article at that url.
     '''
-    html = helpers.get_content(url)
-    if not html:
-      return None
+    try:
+      html = helpers.get_content(url)
+      if not html:
+        return None
 
-    soup = BeautifulSoup(html)
-    headline = helpers.decode(soup.h1.string)
+      soup = BeautifulSoup(html)
+      headline = helpers.decode(soup.h1.string)
 
-    article = soup.find('div', attrs={'class': 'cont-wp'})
-    paragraphs = article.find_all('p', attrs={'class': None})
-    p_text = [helpers.decode(p.get_text()) for p in paragraphs]
-    # Get rid of 'Tags' and 'Trends' headers, and 'READ MORE' links
-    body = ' '.join([p for p in p_text if not (p.startswith('\nREAD') or
-                                      p == 'Tags' or
-                                      p == 'Trends')])
+      article = soup.find('div', attrs={'class': 'cont-wp'})
+      paragraphs = article.find_all('p', attrs={'class': None})
+      p_text = [helpers.decode(p.get_text()) for p in paragraphs]
+      # Get rid of 'Tags' and 'Trends' headers, and 'READ MORE' links
+      body = ' '.join([p for p in p_text if not (p.startswith('\nREAD') or
+                                        p == 'Tags' or
+                                        p == 'Trends')])
 
-    log.info(headline)
-    log.info(body)
-    return news_interface.Article(headline, body, url, news_orgs.RUSSIA_TODAY)
+      date = soup.find('span', attrs={'class': 'time'}).contents[0]
+
+      headline = helpers.decode(headline)
+      body = helpers.decode(body)
+      date = helpers.decode(date)
+
+      logger.log.info('URL: %s' % url)
+      logger.log.info('headline: %s' % headline)
+      logger.log.info('Body: %s' % body)
+
+      return news_interface.Article(headline, body, url, news_orgs.RUSSIA_TODAY,
+                                    date)
+    except Exception as e:
+      logger.log.error("Hit exception getting article for %s: %s" % (url, e))
 
   def get_query_results(self, query):
     '''Implementation for getting an article from Russia Today.
@@ -55,6 +71,5 @@ class RussiaToday(news_interface.NewsOrg):
 
     top_articles = []
     for url in article_urls[0:news_interface.NUM_ARTICLES]:
-      log.info(url)
       top_articles.append(self.get_article(url))
     return top_articles

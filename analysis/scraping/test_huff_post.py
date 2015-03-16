@@ -15,6 +15,10 @@ class TestHuffPost(unittest.TestCase):
     article = self.HuffPost.get_article(url)
     self.assertTrue(isinstance(article, news_interface.Article),
         'Expected the result to be an Article instance')
+    self.assertEqual(article.headline,
+                     "Charlie Hebdo Editor Slams News Organizations For Not "
+                     "Publishing Cartoons")
+    self.assertEqual(article.date, '01/18/2015 12:05 pm EST')
 
   def test_get_query_results(self):
     query = 'charlie+hebdo'

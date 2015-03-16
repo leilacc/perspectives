@@ -1,17 +1,22 @@
 from bs4 import BeautifulSoup
 import logging
 import requests
-import urllib2
 
-import helpers
-from logger import log
-import news_interface
-import news_orgs
+from . import helpers
+from . import logger
+from . import news_interface
+from . import news_orgs
 
-logging.basicConfig(filename='times_of_israel.log', level=logging.WARNING)
+logging.basicConfig(filename='%s/times_of_israel.log' % logger.cwd,
+                    level=logging.DEBUG,
+                    format=logger.fmt, datefmt=logger.datefmt)
+
 
 class TimesOfIsrael(news_interface.NewsOrg):
   '''Methods for interacting with the Times of Israel website.'''
+
+  def __repr__(self):
+    return news_orgs.TIMES_OF_ISRAEL
 
   def get_article(self, url):
     '''Implementation for getting an article from Times of Israel.
@@ -22,20 +27,30 @@ class TimesOfIsrael(news_interface.NewsOrg):
     Returns:
       The Article representing the article at that url.
     '''
-    html = helpers.get_content(url)
-    if not html:
-      return None
+    try:
+      html = helpers.get_content(url)
+      if not html:
+        return None
 
-    soup = BeautifulSoup(html)
+      soup = BeautifulSoup(html)
+      h1 = soup.find('h1', attrs={'class': 'headline'})
+      headline = helpers.decode(h1.text)
+      paragraphs = soup.findAll("p", {"itemprop": "articleBody"})
+      body = ' '.join([helpers.decode(p.text) for p in paragraphs])
+      date = soup.find('span', attrs={'class': 'date'}).getText()
 
-    h1 = soup.find('h1', attrs={'class': 'headline'})
-    headline = helpers.decode(h1.text)
-    paragraphs = soup.findAll("p", {"itemprop": "articleBody"})
-    body = ' '.join([helpers.decode(p.text) for p in paragraphs])
+      headline = helpers.decode(headline)
+      body = helpers.decode(body)
+      date = helpers.decode(date)
 
-    log.info(headline)
-    log.info(body)
-    return news_interface.Article(headline, body, url, news_orgs.TIMES_OF_ISRAEL)
+      logger.log.info('URL: %s' % url)
+      logger.log.info('headline: %s' % headline)
+      logger.log.info('Body: %s' % body)
+
+      return news_interface.Article(headline, body, url,
+                                    news_orgs.TIMES_OF_ISRAEL, date)
+    except Exception as e:
+      logger.log.error("Hit exception getting article for %s: %s" % (url, e))
 
   def get_query_results(self, query):
     '''Implementation for keyword searches from Times of Israel.
