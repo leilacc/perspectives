@@ -11,8 +11,6 @@ from scraping import aljazeera, bbc, cbc, cnn, globe_and_mail, guardian, \
                      russia_today, times_of_israel, todays_zaman, usa_today
 from scraping import logger
 
-NUM_CONCURRENT = 200
-
 AL_JAZEERA = aljazeera.AlJazeera()
 BBC = bbc.BBC()
 CBC = cbc.CBC()
@@ -52,12 +50,13 @@ def get_perspectives(url):
   if article:
     headline = article.headline
     body = article.body
+    org = article.news_org
+
     article_topic = extract_keywords.extract_keywords(headline)
 
-    NP_to_sentence = compare_articles.get_NPs(body)
+    '''
+    NP_to_sentence, VP_to_sentence  = compare_articles.get_phrases(body, org)
     NPs = set(NP_to_sentence.keys())
-
-    VP_to_sentence = compare_articles.get_VPs(body)
     VPs = set(VP_to_sentence.keys())
 
     n = len(NEWS_ORGS)
@@ -66,34 +65,41 @@ def get_perspectives(url):
                                  [NP_to_sentence]*n, [VP_to_sentence]*n,
                                  [NPs]*n, [VPs]*n,
                                  [1]*n)
-      return json.dumps(list(comparisons))
-    #return json.dumps(get_comparison(1,article_topic,1,1,1,1,1,1, article.body))
+      compared_articles_by_org = list(comparisons)
+      # flatten from list of lists of articles (separated by news org) to list
+      # of articles
+      compared_articles = [article for org_articles in compared_articles_by_org
+                                   for article in org_articles]
+      return json.dumps(compared_articles)
+    # uncomment to run iteratively
+      '''
+    return json.dumps(get_comparison(1,article_topic,1,1,1,1, article))
   else:
     return json.dumps("Not a recognized article")
 
-def test_args(n, k, j, l, m, q, o, t, r):
-  return []
-
-
 def get_comparison(news_org, article_topic, NP_to_sentence, VP_to_sentence,
-                   NPs, VPs, article_body):
+                   NPs, VPs, article):
   '''Compares the articles from a single NewsOrg to an article that is
   represented by its NPs and VPs.'''
+  '''
   NP_synsets = compare_articles.get_synsets_and_ancestors(NPs)
   VP_synsets = compare_articles.get_synsets_and_ancestors(VPs, NP=False)
   comparison_articles = news_org.get_query_results(article_topic)
   comparisons = []
   for comparison_article in comparison_articles:
-    comparisons.append(
-        compare_articles.compare_articles(NP_to_sentence, VP_to_sentence,
-                                          NPs, VPs,
-                                          NP_synsets, VP_synsets,
-                                          comparison_article))
+    try:
+      comparisons.append(
+          compare_articles.compare_articles(NP_to_sentence, VP_to_sentence,
+                                            NPs, VPs,
+                                            NP_synsets, VP_synsets,
+                                            comparison_article))
+    except:
+      continue
   return comparisons
+  # uncomment to run iteratively
   '''
   return compare_articles.compare_to_all_articles(
-      article_body, query_all_news_orgs(article_topic))
-  '''
+      article, query_all_news_orgs(article_topic))
 
 def query_all_news_orgs(query):
   '''Get the top articles for the given query from all supported news orgs.

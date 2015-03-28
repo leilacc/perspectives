@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-import json
 import nltk
 from nltk.corpus import wordnet as wn
 from nltk.chunk.regexp import *
+
+import logger
 
 
 DefaultNpPattern = ''.join([r'(<DT|AT>?<RB>?)?',
@@ -12,6 +13,9 @@ DefaultNpPattern = ''.join([r'(<DT|AT>?<RB>?)?',
 BaselineNpChunkRule = ChunkRule(DefaultNpPattern,
                                 'Default rule for NP chunking')
 NpChunker = RegexpChunkParser([BaselineNpChunkRule])
+
+DISTANCE_LIMIT = 5
+
 
 def lemmatize(word, pos):
   # lemmatizes a word
@@ -53,36 +57,41 @@ def check_wn_phrase(NPleaves):
     NPleaves = NPleaves[0:-1]
   return NPleaves
 
-def get_VPs(string):
+def get_phrases(string, org):
+  '''Returns the noun and verb phrases in string.
+
+  Args:
+    string: A string.
+    org: The NewsOrg that wrote the string.
+
+  Returns:
+    A tuple of two dictionaries: one of the noun phrases in string to the
+    sentence in string that it came from, and similarly for verb phrases.
+  '''
+  NPs = {}
   VPs = {}
   for sentence in string.split('.'):
     tokens = nltk.word_tokenize(sentence)
+    #logger.log.info('Tokens from %s: %s' % (org, tokens))
     tagged_tokens = nltk.pos_tag(tokens)
     for word, tag in tagged_tokens:
       word = lemmatize(word, 'v')
-      if tag.startswith('V') and word in VPs.iterkeys():
+      if tag.startswith('V') and word in VPs.keys():
         VPs[word].append(sentence)
       else:
         VPs[word] = [sentence]
-  return VPs
-
-def get_NPs(string):
-  NPs = {}
-  for sentence in string.split('.'):
-    tokens = nltk.word_tokenize(sentence)
-    tagged_tokens = nltk.pos_tag(tokens)
     for np in chunk(tagged_tokens):
-      if np in NPs.iterkeys():
+      if np in NPs.keys():
         NPs[np].append(sentence)
       else:
         NPs[np] = [sentence]
-  return NPs
+  return NPs, VPs
 
 def chunk(pos_tagged_tokens):
   chunks = []
   tree = NpChunker.parse(pos_tagged_tokens)
   for child in tree:
-    if type(child) == nltk.Tree and child.node == 'NP':
+    if type(child) == nltk.Tree and child.label() == 'NP':
       leaves = child.leaves()
       chunks.append(leaves_to_str(check_wn_phrase(leaves)))
 
@@ -90,7 +99,11 @@ def chunk(pos_tagged_tokens):
 
 def get_synset(np):
   tokens = nltk.word_tokenize(np)
-  synsets = wn.synsets('_'.join(tokens), 'n')
+  try:
+    synsets = wn.synsets('_'.join(tokens), 'n')
+  except:
+    return None
+
   while tokens and not synsets:
     # remove modifiers from noun head
     tagged_np = nltk.pos_tag(tokens)
@@ -98,7 +111,10 @@ def get_synset(np):
       tokens = tokens[1:]
     else:
       break
-    synsets = wn.synsets('_'.join(tokens), 'n')
+    try:
+      synsets = wn.synsets('_'.join(tokens), 'n')
+    except:
+      return None
 
   if synsets:
     return synsets[0]
@@ -128,16 +144,22 @@ def get_synsets(np1, np2):
     return
   return (synsets1, synsets2)
 
-def synset_distance(hypo, hyper):
+def synset_distance(hypo, hyper, acc=0):
+  #logger.log.info('Hypo: %s' % (hypo))
+  if acc == DISTANCE_LIMIT:
+    return acc
   if hypo in hyper:
     return 0
   hypernyms = hypo.hypernyms()
   if not hypernyms:
     return float("inf")
-  return 1 + min([synset_distance(new_hypo, hyper) for new_hypo in hypernyms])
+  return 1 + min([synset_distance(new_hypo, hyper, acc + 1) for new_hypo in hypernyms])
 
 def get_ancestors(synset):
-  ancestors = synset.hypernyms()
+  try:
+    ancestors = synset.hypernyms()
+  except:
+    return []
   for hypernym in synset.hypernyms():
     ancestors.extend(get_ancestors(hypernym))
   return ancestors
@@ -189,16 +211,19 @@ def check_distances(diff, comparison_synsets, phrase_to_sentence,
   '''
   for phrase in diff:
     phrase = phrase.encode('utf-8')
-    if NP:
-      synset = get_synset(phrase)
-    else:
-      synset = wn.synsets(phrase, 'v')
-      if synset:
-        synset = synset[0]
+    try:
+      if NP:
+        synset = get_synset(phrase)
+      else:
+        synset = wn.synsets(phrase, 'v')
+        if synset:
+          synset = synset[0]
+    except:
+      return float('inf')
 
     if synset:
       distance = synset_distance(synset, comparison_synsets)
-      if distance > 4 and distance != float("inf"):
+      if distance >= DISTANCE_LIMIT and distance != float("inf"):
         highlight_sentence(highlighted_sentences, phrase_to_sentence, phrase)
 
 def compare_articles(a1_NP_to_sentence, a1_VP_to_sentence,
@@ -221,11 +246,11 @@ def compare_articles(a1_NP_to_sentence, a1_VP_to_sentence,
     comparison_article: the Article to be compared to article 1.
 
   Returns:
-    A json-encoded list of sentences from comparison_article that
-    contain semantic concepts very different from the article a1.
+    A dictionary representation of comparison_article, including a list of
+    sentences that contain semantic concepts very different from the article a1.
   '''
-  a2_NP_to_sentence = get_NPs(comparison_article.body)
-  a2_VP_to_sentence = get_VPs(comparison_article.body)
+  a2_NP_to_sentence, a2_VP_to_sentence = get_phrases(
+      comparison_article.body, comparison_article.news_org)
 
   a2_NPs = set(a2_NP_to_sentence)
   a2_VPs = set(a2_VP_to_sentence)
@@ -242,16 +267,16 @@ def compare_articles(a1_NP_to_sentence, a1_VP_to_sentence,
   comparison_results = comparison_article.to_dict()
   comparison_results['sentences'] = highlighted_sentences.values()
   if comparison_results['sentences']:
-    return json.dumps(comparison_results)
+    return comparison_results
   else:
     return None
 
-def compare_to_all_articles(article_body, comparison_articles):
+def compare_to_all_articles(article, comparison_articles):
   '''Compares article to the comparison_articles.
   TODO: Deprecate this in favour of parallel comparisons.
 
   Args:
-    article_body: string, the body of an Article
+    article: an Article
     comparison_articles: a list of Articles to be compared to the article_body
 
   Returns:
@@ -259,11 +284,11 @@ def compare_to_all_articles(article_body, comparison_articles):
     attribute containing a list of sentences with different facts from the
     original article.
   '''
-  articleNPs = get_NPs(article_body)
+  articleNPs, articleVPs = get_phrases(article.body, article.news_org)
+
   NPs = set(articleNPs.keys())
   NP_synsets = get_synsets_and_ancestors(articleNPs)
 
-  articleVPs = get_VPs(article_body)
   VPs = set(articleVPs.keys())
   VP_synsets = get_synsets_and_ancestors(articleVPs, NP=False)
 
@@ -271,8 +296,8 @@ def compare_to_all_articles(article_body, comparison_articles):
   for comparison_article in comparison_articles:
     if comparison_article:
       comparison_results = comparison_article.to_dict()
-      comparison_results['sentences'] = compare_articles(
+      comparison_results = compare_articles(
           articleNPs, articleVPs, NPs, VPs, NP_synsets, VP_synsets,
           comparison_article)
       all_results.append(comparison_results)
-  return json.dumps(all_results)
+  return all_results
