@@ -67,7 +67,7 @@ class NYPost(news_interface.NewsOrg):
     '''
     res = requests.get('http://nypost.com/?s=%s' % (query))
     soup = BeautifulSoup(res.text)
-    articles = soup.find_all('article')
+    articles = soup.find_all('article', attrs={'class': 'article'})
     article_urls = [article.h3.a.get('href') for article in articles]
 
     top_articles = []
