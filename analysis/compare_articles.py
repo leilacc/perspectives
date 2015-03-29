@@ -16,6 +16,8 @@ NpChunker = RegexpChunkParser([BaselineNpChunkRule])
 
 DISTANCE_LIMIT = 6
 
+TOKENIZER = nltk.data.load('tokenizers/punkt/english.pickle')
+
 
 def lemmatize(word, pos):
   # lemmatizes a word
@@ -70,7 +72,7 @@ def get_phrases(string, org):
   '''
   NPs = {}
   VPs = {}
-  for sentence in string.split('.'):
+  for sentence in TOKENIZER.tokenize(string): # tokenize into sentences
     tokens = nltk.word_tokenize(sentence)
     #logger.log.info('Tokens from %s: %s' % (org, tokens))
     tagged_tokens = nltk.pos_tag(tokens)
