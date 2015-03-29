@@ -14,7 +14,7 @@ BaselineNpChunkRule = ChunkRule(DefaultNpPattern,
                                 'Default rule for NP chunking')
 NpChunker = RegexpChunkParser([BaselineNpChunkRule])
 
-DISTANCE_LIMIT = 5
+DISTANCE_LIMIT = 6
 
 
 def lemmatize(word, pos):
@@ -184,7 +184,7 @@ def get_synsets_and_ancestors(phrases, NP=True):
       synsets.append(synset)
       synsets.extend(get_ancestors(synset))
 
-  return synsets
+  return [(synset.pos(), synset.offset()) for synset in synsets]
 
 def highlight_sentence(highlighted_sentences, phrases, key):
   sentence = phrases[key][0].encode('utf-8').strip() + '.'

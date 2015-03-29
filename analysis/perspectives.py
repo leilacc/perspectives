@@ -3,6 +3,9 @@
 import futures
 import json
 import re
+import time
+
+from nltk.corpus import wordnet as wn
 
 import compare_articles
 import extract_keywords
@@ -46,23 +49,35 @@ def get_perspectives(url):
     attribute. 'sentences' contains a list of sentences with semantically
     different words that were extracted from the corresponding article's body.
   '''
+  start_time = time.time()
   article = url_to_article(url)
+  print("--- url_to_article: %s seconds ---" % (time.time() - start_time))
   if article:
+    start_time = time.time()
     headline = article.headline
     body = article.body
     org = article.news_org
 
     article_topic = extract_keywords.extract_keywords(headline)
+    print("--- keyword extraction: %s seconds ---" % (time.time() - start_time))
 
+    start_time = time.time()
     NP_to_sentence, VP_to_sentence  = compare_articles.get_phrases(body, org)
     NPs = set(NP_to_sentence.keys())
     VPs = set(VP_to_sentence.keys())
+    print("--- surface comparison article: %s seconds ---" % (time.time() - start_time))
+
+    start_time = time.time()
+    NP_synsets = compare_articles.get_synsets_and_ancestors(NPs)
+    VP_synsets = compare_articles.get_synsets_and_ancestors(VPs, NP=False)
+    print("--- get_synsets: %s seconds ---" % (time.time() - start_time))
 
     n = len(NEWS_ORGS)
     with futures.ProcessPoolExecutor(max_workers=n) as executor:
       comparisons = executor.map(get_comparison, NEWS_ORGS, [article_topic]*n,
                                  [NP_to_sentence]*n, [VP_to_sentence]*n,
                                  [NPs]*n, [VPs]*n,
+                                 [NP_synsets]*n, [VP_synsets]*n,
                                  [1]*n)
       compared_articles_by_org = list(comparisons)
       # flatten from list of lists of articles (separated by news org) to list
@@ -78,11 +93,16 @@ def get_perspectives(url):
     return json.dumps("Not a recognized article")
 
 def get_comparison(news_org, article_topic, NP_to_sentence, VP_to_sentence,
-                   NPs, VPs, article):
+                   NPs, VPs, NP_synsets, VP_synsets, article):
   '''Compares the articles from a single NewsOrg to an article that is
   represented by its NPs and VPs.'''
-  NP_synsets = compare_articles.get_synsets_and_ancestors(NPs)
-  VP_synsets = compare_articles.get_synsets_and_ancestors(VPs, NP=False)
+  start_time = time.time()
+  NP_synsets = [wn._synset_from_pos_and_offset(pos, offset)
+                for (pos, offset) in NP_synsets]
+  VP_synsets = [wn._synset_from_pos_and_offset(pos, offset)
+                for (pos, offset) in VP_synsets]
+  print("--- inner get_synsets: %s seconds ---" % (time.time() - start_time))
+
   comparison_articles = news_org.get_query_results(article_topic)
   comparisons = []
   for comparison_article in comparison_articles:
