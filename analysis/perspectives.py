@@ -54,7 +54,6 @@ def get_perspectives(url):
 
     article_topic = extract_keywords.extract_keywords(headline)
 
-    '''
     NP_to_sentence, VP_to_sentence  = compare_articles.get_phrases(body, org)
     NPs = set(NP_to_sentence.keys())
     VPs = set(VP_to_sentence.keys())
@@ -74,6 +73,7 @@ def get_perspectives(url):
     # uncomment to run iteratively
       '''
     return json.dumps(get_comparison(1,article_topic,1,1,1,1, article))
+    '''
   else:
     return json.dumps("Not a recognized article")
 
@@ -81,7 +81,6 @@ def get_comparison(news_org, article_topic, NP_to_sentence, VP_to_sentence,
                    NPs, VPs, article):
   '''Compares the articles from a single NewsOrg to an article that is
   represented by its NPs and VPs.'''
-  '''
   NP_synsets = compare_articles.get_synsets_and_ancestors(NPs)
   VP_synsets = compare_articles.get_synsets_and_ancestors(VPs, NP=False)
   comparison_articles = news_org.get_query_results(article_topic)
@@ -100,6 +99,7 @@ def get_comparison(news_org, article_topic, NP_to_sentence, VP_to_sentence,
   '''
   return compare_articles.compare_to_all_articles(
       article, query_all_news_orgs(article_topic))
+  '''
 
 def query_all_news_orgs(query):
   '''Get the top articles for the given query from all supported news orgs.
