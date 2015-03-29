@@ -96,12 +96,10 @@ def get_comparison(news_org, article_topic, NP_to_sentence, VP_to_sentence,
                    NPs, VPs, NP_synsets, VP_synsets, article):
   '''Compares the articles from a single NewsOrg to an article that is
   represented by its NPs and VPs.'''
-  start_time = time.time()
   NP_synsets = [wn._synset_from_pos_and_offset(pos, offset)
                 for (pos, offset) in NP_synsets]
   VP_synsets = [wn._synset_from_pos_and_offset(pos, offset)
                 for (pos, offset) in VP_synsets]
-  print("--- inner get_synsets: %s seconds ---" % (time.time() - start_time))
 
   comparison_articles = news_org.get_query_results(article_topic)
   comparisons = []

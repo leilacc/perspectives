@@ -3,8 +3,6 @@ import nltk
 from nltk.corpus import wordnet as wn
 from nltk.chunk.regexp import *
 
-import logger
-
 
 DefaultNpPattern = ''.join([r'(<DT|AT>?<RB>?)?',
 			    r'<JJ.*|CD.*>*',
@@ -74,7 +72,6 @@ def get_phrases(string, org):
   VPs = {}
   for sentence in TOKENIZER.tokenize(string): # tokenize into sentences
     tokens = nltk.word_tokenize(sentence)
-    #logger.log.info('Tokens from %s: %s' % (org, tokens))
     tagged_tokens = nltk.pos_tag(tokens)
     for word, tag in tagged_tokens:
       word = lemmatize(word, 'v')
@@ -147,7 +144,6 @@ def get_synsets(np1, np2):
   return (synsets1, synsets2)
 
 def synset_distance(hypo, hyper, acc=0):
-  #logger.log.info('Hypo: %s' % (hypo))
   if acc == DISTANCE_LIMIT:
     return acc
   if hypo in hyper:
