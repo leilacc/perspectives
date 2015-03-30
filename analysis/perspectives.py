@@ -34,6 +34,13 @@ NEWS_ORGS = [AL_JAZEERA, BBC, CBC, CNN, GLOBE_AND_MAIL, GUARDIAN, HUFF_POST,
             JPOST, NY_POST, NY_TIMES, REUTERS, RT, TIMES_OF_ISRAEL,
             TODAYS_ZAMAN, USA_TODAY]
 
+def get_article_phrases(body, org):
+  NP_to_sentence, VP_to_sentence  = compare_articles.get_phrases(body, org)
+  NPs = set(NP_to_sentence.keys())
+  VPs = set(VP_to_sentence.keys())
+  NP_synsets = compare_articles.get_synsets_and_ancestors(NPs)
+  VP_synsets = compare_articles.get_synsets_and_ancestors(VPs, NP=False)
+  return (NP_to_sentence, VP_to_sentence, NPs, VPs, NP_synsets, VP_synsets)
 
 def get_perspectives(url):
   '''Get different perspectives on the topic covered by article.
@@ -62,15 +69,9 @@ def get_perspectives(url):
     print("--- keyword extraction: %s seconds ---" % (time.time() - start_time))
 
     start_time = time.time()
-    NP_to_sentence, VP_to_sentence  = compare_articles.get_phrases(body, org)
-    NPs = set(NP_to_sentence.keys())
-    VPs = set(VP_to_sentence.keys())
+    (NP_to_sentence, VP_to_sentence, NPs, VPs, NP_synsets, VP_synsets) = \
+        get_article_phrases(body, org)
     print("--- surface comparison article: %s seconds ---" % (time.time() - start_time))
-
-    start_time = time.time()
-    NP_synsets = compare_articles.get_synsets_and_ancestors(NPs)
-    VP_synsets = compare_articles.get_synsets_and_ancestors(VPs, NP=False)
-    print("--- get_synsets: %s seconds ---" % (time.time() - start_time))
 
     n = len(NEWS_ORGS)
     with futures.ProcessPoolExecutor(max_workers=n) as executor:
