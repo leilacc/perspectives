@@ -3,6 +3,8 @@ import nltk
 from nltk.corpus import wordnet as wn
 from nltk.chunk.regexp import *
 
+from textblob import Blobber, TextBlob
+from textblob_aptagger import PerceptronTagger
 
 DefaultNpPattern = ''.join([r'(<DT|AT>?<RB>?)?',
 			    r'<JJ.*|CD.*>*',
@@ -15,7 +17,7 @@ NpChunker = RegexpChunkParser([BaselineNpChunkRule])
 DISTANCE_LIMIT = 6
 
 TOKENIZER = nltk.data.load('tokenizers/punkt/english.pickle')
-
+TAGGER = Blobber(pos_tagger=PerceptronTagger())
 
 def lemmatize(word, pos):
   # lemmatizes a word
@@ -70,9 +72,10 @@ def get_phrases(string, org):
   '''
   NPs = {}
   VPs = {}
-  for sentence in TOKENIZER.tokenize(string): # tokenize into sentences
-    tokens = nltk.word_tokenize(sentence)
-    tagged_tokens = nltk.pos_tag(tokens)
+  sentences = TOKENIZER.tokenize(string)
+  for sentence in sentences: # tokenize into sentences
+    tagged_tokens = TAGGER(sentence).tags
+
     for word, tag in tagged_tokens:
       word = lemmatize(word, 'v')
       if tag.startswith('V') and word in VPs.keys():
