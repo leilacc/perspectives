@@ -11,7 +11,7 @@ class TestPerspectives(unittest.TestCase):
     res = perspectives.get_perspectives(url)
     compared_articles = json.loads(res)
     length = len(compared_articles)
-    self.assertTrue(length > 10, 'Length is %s' % length)
+    self.assertTrue(length > 5, 'Length is %s' % length)
     self.assertTrue(compared_articles[0]['sentences'],
                     'Result not of expected format')
 
