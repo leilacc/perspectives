@@ -35,7 +35,7 @@ NEWS_ORGS = [AL_JAZEERA, BBC, CBC, CNN, GLOBE_AND_MAIL, GUARDIAN, HUFF_POST,
             TODAYS_ZAMAN, USA_TODAY]
 
 def get_article_phrases(body, org):
-  NP_to_sentence, VP_to_sentence  = compare_articles.get_phrases(body, org)
+  NP_to_sentence, VP_to_sentence = compare_articles.get_phrases(body, org)
   NPs = set(NP_to_sentence.keys())
   VPs = set(VP_to_sentence.keys())
   NP_synsets = compare_articles.get_synsets_and_ancestors(NPs)
@@ -97,6 +97,7 @@ def get_comparison(news_org, article_topic, NP_to_sentence, VP_to_sentence,
                    NPs, VPs, NP_synsets, VP_synsets, article):
   '''Compares the articles from a single NewsOrg to an article that is
   represented by its NPs and VPs.'''
+  # synsets aren't picklable so they're stored as (pos, offset) and unpacked
   NP_synsets = [wn._synset_from_pos_and_offset(pos, offset)
                 for (pos, offset) in NP_synsets]
   VP_synsets = [wn._synset_from_pos_and_offset(pos, offset)
