@@ -94,10 +94,14 @@ class NewsOrg:
     Returns:
       A list of the top Articles returned by the query search.
     '''
-    if self.search_url:
-      search_results = requests.get(self.search_url % (query))
-    else:
-      search_results = self.get_raw_search_results(query)
+    try:
+      search_results = requests.get(self.search_url % (query),
+                                    timeout=helpers.TIMEOUT)
+    except requests.exceptions.Timeout as e:
+      logger.log.error('Requests timeout for %s in get_query_results: %s' %
+                       (self, e))
+      return None
+
     result_urls = self.process_search_results(search_results)
     top_articles = []
     for url in result_urls[0:news_interface.NUM_ARTICLES]:

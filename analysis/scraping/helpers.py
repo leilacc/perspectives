@@ -7,6 +7,8 @@ import sys
 
 import logger
 
+TIMEOUT = 2 # number of seconds to wait for a server response before timing out
+
 def decode(strr):
   '''Decodes strings that were scraped from the web. Fixes spacing and quotes'''
   strr = strr.strip().strip('\r\n').strip('\n')
@@ -25,7 +27,13 @@ def decode(strr):
 def get_content(url):
   '''Returns the text content of a webpage, encoded as ASCII.'''
   try:
-    text = requests.get(url).text
+    text = requests.get(url, timeout=TIMEOUT).text
+  except requests.exceptions.Timeout as e:
+    logger.log.error('Requests timeout for url %s in get_content: %s' %
+                     (url, e))
+    return None
+
+  try:
     text = re.sub(r'&nbsp;', ' ', text)
     text = text.strip().strip('\r\n').strip('\n')
     return text

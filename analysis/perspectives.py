@@ -104,6 +104,8 @@ def get_comparison(news_org, article_topic, NP_to_sentence, VP_to_sentence,
                 for (pos, offset) in VP_synsets]
 
   comparison_articles = news_org.get_query_results(article_topic)
+  if not comparison_articles:
+    return []
   comparisons = []
   for comparison_article in comparison_articles:
     try:
