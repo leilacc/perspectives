@@ -86,10 +86,6 @@ def get_perspectives(url):
       compared_articles = [article for org_articles in compared_articles_by_org
                                    for article in org_articles]
       return json.dumps(compared_articles)
-    # uncomment to run iteratively
-      '''
-    return json.dumps(get_comparison(1,article_topic,1,1,1,1, article))
-    '''
   else:
     return json.dumps("Not a recognized article")
 
@@ -117,11 +113,6 @@ def get_comparison(news_org, article_topic, NP_to_sentence, VP_to_sentence,
     except:
       continue
   return comparisons
-  # uncomment to run iteratively
-  '''
-  return compare_articles.compare_to_all_articles(
-      article, query_all_news_orgs(article_topic))
-  '''
 
 def query_all_news_orgs(query):
   '''Get the top articles for the given query from all supported news orgs.

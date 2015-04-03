@@ -271,34 +271,3 @@ def compare_articles(a1_NP_to_sentence, a1_VP_to_sentence,
     return comparison_results
   else:
     return None
-
-def compare_to_all_articles(article, comparison_articles):
-  '''Compares article to the comparison_articles.
-  TODO: Deprecate this in favour of parallel comparisons.
-
-  Args:
-    article: an Article
-    comparison_articles: a list of Articles to be compared to the article_body
-
-  Returns:
-    The list of comparison_articles in JSON format, with a 'sentences'
-    attribute containing a list of sentences with different facts from the
-    original article.
-  '''
-  articleNPs, articleVPs = get_phrases(article.body, article.news_org)
-
-  NPs = set(articleNPs.keys())
-  NP_synsets = get_synsets_and_ancestors(articleNPs)
-
-  VPs = set(articleVPs.keys())
-  VP_synsets = get_synsets_and_ancestors(articleVPs, NP=False)
-
-  all_results = []
-  for comparison_article in comparison_articles:
-    if comparison_article:
-      comparison_results = comparison_article.to_dict()
-      comparison_results = compare_articles(
-          articleNPs, articleVPs, NPs, VPs, NP_synsets, VP_synsets,
-          comparison_article)
-      all_results.append(comparison_results)
-  return all_results
