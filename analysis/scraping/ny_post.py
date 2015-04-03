@@ -1,16 +1,8 @@
 from bs4 import BeautifulSoup
-import json
-import logging
-import requests
 
-from . import helpers
-from . import logger
-from . import news_interface
-from . import news_orgs
-
-logging.basicConfig(filename='%s/ny_post.log' % logger.cwd,
-                    level=logging.DEBUG,
-                    format=logger.fmt, datefmt=logger.datefmt)
+import helpers
+import news_interface
+import news_orgs
 
 
 class NYPost(news_interface.NewsOrg):
@@ -22,55 +14,30 @@ class NYPost(news_interface.NewsOrg):
   >>> nyp.get_article('http://nypost.com/2015/01/25/paris-terrorists-fit-profile-of-homegrown-threat-described-in-2007-nypd-report/')
   '''
 
+  def __init__(self):
+    self.news_org = news_orgs.NY_POST
+    self.search_url = 'http://nypost.com/?s=%s'
+
   def __repr__(self):
-    return news_orgs.NY_POST
+    return self.news_org
 
-  def get_article(self, url):
-    '''Implementation for getting an article from the New York Post.
+  def get_headline(self, soup):
+    headline = soup.h1.a.string
+    return headline
 
-    url: A URL in the nypost.com domain.
+  def get_body(self, soup):
+    article = soup.find('div', attrs={'class': 'entry-content'})
+    paragraphs = article.find_all('p', attrs={'class': None})
+    body = ' '.join(
+        [helpers.decode(p.get_text()) for p in paragraphs])
+    return body
 
-    Returns: The Article representing the article at that url.
-    '''
-    try:
-      html = helpers.get_content(url)
-      if not html:
-        return None
+  def get_date(self, soup):
+    date = soup.find('p', attrs={'class': 'byline-date'}).string
+    return date
 
-      soup = BeautifulSoup(html)
-      headline = helpers.decode(soup.h1.a.string)
-      article = soup.find('div', attrs={'class': 'entry-content'})
-      paragraphs = article.find_all('p', attrs={'class': None})
-      body = ' '.join(
-          [helpers.decode(p.get_text()) for p in paragraphs])
-      date = soup.find('p', attrs={'class': 'byline-date'}).string
-
-      headline = helpers.decode(headline)
-      body = helpers.decode(body)
-      date = helpers.decode(date)
-
-      logger.log.info('URL: %s' % url)
-      logger.log.info('headline: %s' % headline)
-      logger.log.info('Body: %s' % body)
-
-      return news_interface.Article(headline, body, url, news_orgs.NY_POST,
-                                    date)
-    except Exception as e:
-      logger.log.error("Hit exception getting article for %s: %s" % (url, e))
-
-  def get_query_results(self, query):
-    '''Implementation for getting an article from the New York Post.
-
-    query: A URL-encoded string.
-
-    Returns: A list of the top Articles returned by the query search.
-    '''
-    res = requests.get('http://nypost.com/?s=%s' % (query))
+  def process_search_results(self, res):
     soup = BeautifulSoup(res.text)
     articles = soup.find_all('article', attrs={'class': 'article'})
     article_urls = [article.h3.a.get('href') for article in articles]
-
-    top_articles = []
-    for url in article_urls[0:news_interface.NUM_ARTICLES]:
-        top_articles.append(self.get_article(url))
-    return top_articles
+    return article_urls

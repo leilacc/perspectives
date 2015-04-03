@@ -1,76 +1,43 @@
 from bs4 import BeautifulSoup
-import logging
-import requests
 
-from . import helpers
-from . import logger
-from . import news_interface
-from . import news_orgs
-
-logging.basicConfig(filename='%s/cnn.log' % logger.cwd,
-                    level=logging.DEBUG,
-                    format=logger.fmt, datefmt=logger.datefmt)
+import news_interface
+import news_orgs
 
 
 class CNN(news_interface.NewsOrg):
   '''Methods for interacting with the CNN website.'''
 
+  def __init__(self):
+    self.news_org = news_orgs.CNN
+    self.search_url = "http://searchapp.cnn.com/search/query.jsp?page=1&npp=10&start=1&text=%s&type=all&bucket=true&sort=relevance&csiID=csi1"
+
   def __repr__(self):
-    return news_orgs.CNN
+    return self.news_org
 
-  def get_article(self, url):
-    '''Implementation for getting an article from CNN.
+  def get_headline(self, soup):
+    a = soup.find("title")
+    k = a.text.split("-")
+    headline = k[0]
+    return headline
 
-    Args:
-      url: A URL in the www.cnn.* domain.
+  def get_body(self, soup):
+    c = soup.findAll("p", attrs={'class': 'zn-body__paragraph'})
+    body = ""
+    for paragraph in c:
+        try:
+            body += paragraph.text.decode("utf-8").replace("\"","'") + " "
+        except UnicodeEncodeError:
+            pass
+    return body
 
-    Returns:
-      The Article representing the article at that url.
-    '''
+  def get_date(self, soup):
     try:
-      html = helpers.get_content(url)
-      if not html:
-        return None
+      date = soup.find('p', attrs={'class': 'update-time'}).string
+    except AttributeError:
+      date = soup.find('p', attrs={'class': 'metadata__data-added'}).string
+    return date
 
-      soup = BeautifulSoup(html)
-      a = soup.find("title")
-      k = a.text.split("-")
-      headline = helpers.decode(k[0])
-      c = soup.findAll("p", attrs={'class': 'zn-body__paragraph'})
-      body = ""
-      for paragraph in c:
-          try:
-              body += paragraph.text.decode("utf-8").replace("\"","'") + " "
-          except UnicodeEncodeError:
-              pass
-
-      try:
-        date = soup.find('p', attrs={'class': 'update-time'}).string
-      except AttributeError:
-        date = soup.find('p', attrs={'class': 'metadata__data-added'}).string
-
-      headline = helpers.decode(headline)
-      body = helpers.decode(body)
-      date = helpers.decode(date)
-
-      logger.log.info('URL: %s' % url)
-      logger.log.info('headline: %s' % headline)
-      logger.log.info('Body: %s' % body)
-
-      return news_interface.Article(headline, body, url, news_orgs.CNN, date)
-    except Exception as e:
-      logger.log.error("Hit exception getting article for %s: %s" % (url, e))
-
-  def get_query_results(self, query):
-    '''Implementation for keyword searches from CNN.
-
-    Args:
-      query: A URL-encoded string.
-
-    Returns:
-      A list of the top Articles returned by the query search.
-    '''
-    res = requests.get("http://searchapp.cnn.com/search/query.jsp?page=1&npp=10&start=1&text=%s&type=all&bucket=true&sort=relevance&csiID=csi1" % (query))
+  def process_search_results(self, res):
     output = res.text.encode('ascii', 'ignore').split("\"url\":")
 
     article_urls = []
@@ -81,8 +48,4 @@ class CNN(news_interface.NewsOrg):
           article_urls.append(a)
       except:
         pass
-
-    top_articles = []
-    for url in article_urls[0:news_interface.NUM_ARTICLES]:
-      top_articles.append(self.get_article(url))
-    return top_articles
+    return article_urls

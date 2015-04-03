@@ -1,98 +1,63 @@
-from bs4 import BeautifulSoup
 import json
-import logging
-import requests
-
-from . import helpers
-from . import logger
-from . import news_interface
-from . import news_orgs
-
-logging.basicConfig(filename='%s/aljazeera.log' % logger.cwd,
-                    level=logging.DEBUG,
-                    format=logger.fmt, datefmt=logger.datefmt)
+import logger
+import news_interface
+import news_orgs
 
 
 class AlJazeera(news_interface.NewsOrg):
   '''Methods for interacting with the Al Jazeera website.'''
 
+  def __init__(self):
+    self.news_org = news_orgs.ALJAZEERA
+    self.search_url = ("https://www.googleapis.com/customsearch/v1element?key" +
+                       "=AIzaSyCVAXiUzRYsML1Pv6RwSG1gunmMikTzQqY&rsz=filtered" +
+                       "_cse&num=10&hl=en&prettyPrint=false&source=gcsc&gss=." +
+                       "com&sig=23952f7483f1bca4119a89c020d13def&cx=007864276" +
+                       "874919660377:szp4pg3raxu&q=%s&lr=lang_en&filter=1&sor" +
+                       "t=&googlehost=www.google.com&callback=google.search.S" +
+                       "earch.apiary7638&nocache=1422548009762")
+
   def __repr__(self):
-    return news_orgs.ALJAZEERA
+    return self.news_org
 
-  def get_article(self, url):
-    '''Implementation for getting an article from Al Jazeera.
+  def get_headline(self, soup):
+    '''Implementation of get_headline.'''
+    headline = None
+    potential_classes = ["heading-story", "articleOpinion-title"]
+    for h1_class in potential_classes:
+      try:
+        headline = soup.find("h1", {"class": h1_class}).string
+        break
+      except AttributeError:
+        continue
+    if not headline:
+      logger.log.error(
+          'Exception trying to scrape Al Jazeera headline from %s' % (url))
+      return None
+    return headline
 
-    Args:
-      url: A URL in the aljazeera.* domain.
-
-    Returns:
-      The Article representing the article at that url, or None if unable to
-      get the Article.
-    '''
+  def get_body(self, soup):
     try:
-      html = helpers.get_content(url)
-      if not html:
-        return None
+      paragraphs = soup.find("div", {"class": "article-body"})
+      article = paragraphs.findAll("p")
+    except AttributeError:
+      paragraphs = soup.find("div", {"class": "text"})
+      article = paragraphs.findAll("p")
+    body = ' '.join([p.text for p in article])
+    return body
 
-      soup = BeautifulSoup(html)
+  def get_date(self, soup):
+    try:
+      date = soup.find("time").string
+    except AttributeError:
+      date = soup.find("span", {"class": "date"}).string
+    return date
 
-      headline = None
-      potential_classes = ["heading-story", "articleOpinion-title"]
-      for h1_class in potential_classes:
-        try:
-          headline = soup.find("h1", {"class": h1_class}).string
-          break
-        except AttributeError:
-          continue
-      if not headline:
-        logger.log.error(
-            'Exception trying to scrape Al Jazeera headline from %s' % (url))
-        return None
-
-      headline = helpers.decode(headline)
-
-      try:
-        paragraphs = soup.find("div", {"class": "article-body"})
-        article = paragraphs.findAll("p")
-      except AttributeError:
-        paragraphs = soup.find("div", {"class": "text"})
-        article = paragraphs.findAll("p")
-      body = ' '.join([helpers.decode(p.text) for p in article])
-
-      try:
-        date = soup.find("time").string
-      except AttributeError:
-        date = soup.find("span", {"class": "date"}).string
-
-      headline = helpers.decode(headline)
-      body = helpers.decode(body)
-      date = helpers.decode(date)
-
-      logger.log.info('URL: %s' % url)
-      logger.log.info('headline: %s' % headline)
-      logger.log.info('Body: %s' % body)
-
-      return news_interface.Article(headline, body, url, news_orgs.ALJAZEERA,
-                                    date)
-    except Exception as e:
-      logger.log.error("Hit exception getting article for %s: %s" % (url, e))
-
-  def get_query_results(self, query):
-    '''Implementation for keyword searches from Al Jazeera.
-
-    Args:
-      query: A URL-encoded string.
-
-    Returns:
-      A list of the top Articles returned by the query search.
-    '''
-    res = requests.get("https://www.googleapis.com/customsearch/v1element?key=AIzaSyCVAXiUzRYsML1Pv6RwSG1gunmMikTzQqY&rsz=filtered_cse&num=10&hl=en&prettyPrint=false&source=gcsc&gss=.com&sig=23952f7483f1bca4119a89c020d13def&cx=007864276874919660377:szp4pg3raxu&q=%s&lr=lang_en&filter=1&sort=&googlehost=www.google.com&callback=google.search.Search.apiary7638&nocache=1422548009762" % (query))
-
-    json_res = res.text.encode('ascii', 'ignore')[48:-2]
+  def process_search_results(self, raw_results):
+    json_res = raw_results.text.encode('ascii', 'ignore')[48:-2]
     json_res = json.loads(json_res)['results']
     article_urls = [result['url'] for result in json_res]
-    top_articles = []
-    for url in article_urls[0:news_interface.NUM_ARTICLES]:
-      if 'topics' not in url and 'blogs' not in url: # not an article page
-        top_articles.append(self.get_article(url))
-    return top_articles
+    # Remove urls that don't link to articles
+    article_urls = [url for url in article_urls
+                    if 'topics' not in url and 'blogs' not in url]
+    return article_urls

@@ -1,68 +1,39 @@
-from bs4 import BeautifulSoup
-import logging
-import requests
 import xmltodict
 
-from . import api_keys
-from . import helpers
-from . import logger
-from . import news_interface
-from . import news_orgs
-
-logging.basicConfig(filename='%s/usa_today.log' % logger.cwd,
-                    level=logging.DEBUG,
-                    format=logger.fmt, datefmt=logger.datefmt)
+import api_keys
+import helpers
+import logger
+import news_interface
+import news_orgs
 
 
 class USAToday(news_interface.NewsOrg):
   '''Methods for interacting with the USA Today website/API.'''
 
+  def __init__(self):
+    self.news_org = news_orgs.USA_TODAY
+    self.search_url = ("http://api.usatoday.com/open/articles?keyword=%s&" +
+                       "api_key=" + api_keys.api_keys[news_orgs.USA_TODAY])
+
   def __repr__(self):
-    return news_orgs.USA_TODAY
+    return self.news_org
 
-  def get_article(self, url):
-    '''Implementation for getting an article from USA Today.
+  def get_headline(self, soup):
+    headline = soup.article.h1.string
+    return headline
 
-    url: A URL in the http://www.usatoday.com/story/* domain.
+  def get_body(self, soup):
+    article = soup.article
+    paragraphs = article.find_all('p', attrs={'class': None})
+    body = ' '.join([helpers.decode(p.get_text()) for p in paragraphs])
+    return body
 
-    Returns: The Article representing the article at that url.
-    '''
-    try:
-      html = helpers.get_content(url)
-      if not html:
-        return None
+  def get_date(self, soup):
+    time_span = soup.find('span', attrs={'class': 'asset-metabar-time'})
+    date = time_span.contents[0]
+    return date
 
-      soup = BeautifulSoup(html)
-      article = soup.article
-      headline = helpers.decode(article.h1.string)
-      paragraphs = article.find_all('p', attrs={'class': None})
-      body = ' '.join([helpers.decode(p.get_text()) for p in paragraphs])
-      time_span = soup.find('span', attrs={'class': 'asset-metabar-time'})
-      date = time_span.contents[0]
-
-      headline = helpers.decode(headline)
-      body = helpers.decode(body)
-      date = helpers.decode(date)
-
-      logger.log.info('URL: %s' % url)
-      logger.log.info('headline: %s' % headline)
-      logger.log.info('Body: %s' % body)
-
-      return news_interface.Article(headline, body, url, news_orgs.USA_TODAY,
-                                    date)
-    except Exception as e:
-      logger.log.error("Hit exception getting article for %s: %s" % (url, e))
-
-  def get_query_results(self, query):
-    '''Implementation for keyword searches from USA Today.
-
-    query: A URL-encoded string.
-
-    Returns: A list of the top Articles returned by the query search.
-    '''
-    res = requests.get(
-        "http://api.usatoday.com/open/articles?keyword=%s&api_key=%s"
-        % (query, api_keys.api_keys[news_orgs.USA_TODAY]))
+  def process_search_results(self, res):
     xml_dict = xmltodict.parse(res.text)
 
     try:
@@ -70,8 +41,4 @@ class USAToday(news_interface.NewsOrg):
     except KeyError:
       logger.log.error(res.text)
 
-    top_articles = []
-    for article in all_articles[0:news_interface.NUM_ARTICLES]:
-      link = article['link']
-      top_articles.append(self.get_article(link))
-    return top_articles
+    return [article['link'] for article in all_articles]

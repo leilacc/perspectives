@@ -5,7 +5,7 @@ import re
 import requests
 import sys
 
-from . import logger
+import logger
 
 def decode(strr):
   '''Decodes strings that were scraped from the web. Fixes spacing and quotes'''

@@ -1,70 +1,35 @@
 from bs4 import BeautifulSoup
-import logging
-import requests
 
-from . import helpers
-from . import logger
-from . import news_interface
-from . import news_orgs
-
-logging.basicConfig(filename='%s/reuters.log' % logger.cwd,
-                    level=logging.DEBUG,
-                    format=logger.fmt, datefmt=logger.datefmt)
+import news_interface
+import news_orgs
 
 
 class Reuters(news_interface.NewsOrg):
   '''Methods for interacting with the REUTERS website.'''
 
+  def __init__(self):
+    self.news_org = news_orgs.REUTERS
+    self.search_url = 'http://www.reuters.com/search?blob=%s'
+
   def __repr__(self):
-    return news_orgs.REUTERS
+    return self.news_org
 
-  def get_article(self, url):
-    '''Implementation for getting an article from REUTERS.
+  def get_headline(self, soup):
+    headline_div = soup.find('div',
+                             attrs={'class': 'column1 gridPanel grid8'})
+    headline = headline_div.h1.string
+    return headline
 
-    url: A URL in the www.reuters.com* domain.
+  def get_body(self, soup):
+    body = soup.find('span', attrs={'id': 'articleText'}).getText()
+    return body
 
-    Returns: The Article representing the article at that url.
-    '''
-    try:
-      html = helpers.get_content(url)
-      if not html:
-        return None
+  def get_date(self, soup):
+    date = soup.find('span', attrs={'class': 'timestamp'}).string
+    return date
 
-      soup = BeautifulSoup(html)
-      headline_div = soup.find('div',
-                               attrs={'class': 'column1 gridPanel grid8'})
-      headline = helpers.decode(headline_div.h1.string)
-      body = soup.find('span', attrs={'id': 'articleText'}).getText()
-      body = helpers.decode(body)
-
-      date = soup.find('span', attrs={'class': 'timestamp'}).string
-
-      headline = helpers.decode(headline)
-      body = helpers.decode(body)
-      date = helpers.decode(date)
-
-      logger.log.info('URL: %s' % url)
-      logger.log.info('headline: %s' % headline)
-      logger.log.info('Body: %s' % body)
-
-      return news_interface.Article(headline, body, url, news_orgs.REUTERS,
-                                    date)
-    except Exception as e:
-      logger.log.error("Hit exception getting article for %s: %s" % (url, e))
-
-  def get_query_results(self, query):
-    '''Implementation for keyword searches from REUTERS.
-
-    query: A URL-encoded string.
-
-    Returns: A list of the top Articles returned by the query search.
-    '''
-    res = requests.get('http://www.reuters.com/search?blob=%s' % (query))
+  def process_search_results(self, res):
     soup = BeautifulSoup(res.text)
     articles = soup.findAll('li', attrs={'class': 'searchHeadline'})
     article_urls = [article.a.get('href') for article in articles]
-
-    top_articles = []
-    for url in article_urls[0:news_interface.NUM_ARTICLES]:
-        top_articles.append(self.get_article(url))
-    return top_articles
+    return article_urls
