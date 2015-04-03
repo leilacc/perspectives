@@ -3,7 +3,6 @@
 import futures
 import json
 import re
-import time
 
 from nltk.corpus import wordnet as wn
 
@@ -56,22 +55,16 @@ def get_perspectives(url):
     attribute. 'sentences' contains a list of sentences with semantically
     different words that were extracted from the corresponding article's body.
   '''
-  start_time = time.time()
   article = url_to_article(url)
-  print("--- url_to_article: %s seconds ---" % (time.time() - start_time))
   if article:
-    start_time = time.time()
     headline = article.headline
     body = article.body
     org = article.news_org
 
     article_topic = extract_keywords.extract_keywords(headline)
-    print("--- keyword extraction: %s seconds ---" % (time.time() - start_time))
 
-    start_time = time.time()
     (NP_to_sentence, VP_to_sentence, NPs, VPs, NP_synsets, VP_synsets) = \
         get_article_phrases(body, org)
-    print("--- surface comparison article: %s seconds ---" % (time.time() - start_time))
 
     n = len(NEWS_ORGS)
     with futures.ProcessPoolExecutor(max_workers=n) as executor:
