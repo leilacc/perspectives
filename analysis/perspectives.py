@@ -98,11 +98,12 @@ def get_comparison(news_org, article_topic, NP_to_sentence, VP_to_sentence,
   comparisons = []
   for comparison_article in comparison_articles:
     try:
-      comparisons.append(
-          compare_articles.compare_articles(NP_to_sentence, VP_to_sentence,
-                                            NPs, VPs,
-                                            NP_synsets, VP_synsets,
-                                            comparison_article))
+      comparison = compare_articles.compare_articles(NP_to_sentence,
+                                                     VP_to_sentence, NPs, VPs,
+                                                     NP_synsets, VP_synsets,
+                                                     comparison_article)
+      if comparison:
+        comparisons.append(comparison)
     except:
       continue
   return comparisons

@@ -105,7 +105,9 @@ class NewsOrg:
     result_urls = self.process_search_results(search_results)
     top_articles = []
     for url in result_urls[0:news_interface.NUM_ARTICLES]:
-      top_articles.append(self.get_article(url))
+      article = self.get_article(url)
+      if article:
+        top_articles.append(article)
     return top_articles
 
 
