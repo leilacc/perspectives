@@ -1,33 +1,25 @@
 from bs4 import BeautifulSoup
-import logging
-import requests
 
-from api_keys import api_keys
 import helpers
-from logger import log
 import news_interface
 import news_orgs
-
-logging.basicConfig(filename='russia_today.log', level=logging.WARNING)
 
 
 class RussiaToday(news_interface.NewsOrg):
   '''Methods for interacting with the RussiaToday website/API.'''
 
-  def get_article(self, url):
-    '''Implementation for getting an article from the Russia Today.
+  def __init__(self):
+    self.news_org = news_orgs.RUSSIA_TODAY
+    self.search_url = 'http://rt.com/search/news/term/%s'
 
-    url: A URL in the russia_today.com domain.
+  def __repr__(self):
+    return self.news_org
 
-    Returns: The Article representing the article at that url.
-    '''
-    html = helpers.get_content(url)
-    if not html:
-      return None
+  def get_headline(self, soup):
+    headline = soup.h1.string
+    return headline
 
-    soup = BeautifulSoup(html)
-    headline = helpers.decode(soup.h1.string)
-
+  def get_body(self, soup):
     article = soup.find('div', attrs={'class': 'cont-wp'})
     paragraphs = article.find_all('p', attrs={'class': None})
     p_text = [helpers.decode(p.get_text()) for p in paragraphs]
@@ -35,26 +27,15 @@ class RussiaToday(news_interface.NewsOrg):
     body = ' '.join([p for p in p_text if not (p.startswith('\nREAD') or
                                       p == 'Tags' or
                                       p == 'Trends')])
+    return body
 
-    log.info(headline)
-    log.info(body)
-    return news_interface.Article(headline, body, url, news_orgs.RUSSIA_TODAY)
+  def get_date(self, soup):
+    date = soup.find('span', attrs={'class': 'time'}).contents[0]
+    return date
 
-  def get_query_results(self, query):
-    '''Implementation for getting an article from Russia Today.
-
-    query: A URL-encoded string.
-
-    Returns: A list of the top Articles returned by the query search.
-    '''
-    res = requests.get('http://rt.com/search/news/term/%s' % (query))
+  def process_search_results(self, res):
     soup = BeautifulSoup(res.text)
     query_results = soup.find_all('div', attrs={'class': 'searchtopic'})
     article_urls = ['http://rt.com' + result.a.get('href')
                     for result in query_results]
-
-    top_articles = []
-    for url in article_urls[0:news_interface.NUM_ARTICLES]:
-      log.info(url)
-      top_articles.append(self.get_article(url))
-    return top_articles
+    return article_urls

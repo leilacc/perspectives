@@ -1,63 +1,41 @@
 from bs4 import BeautifulSoup
-import json
-import logging
-import requests
 
-import helpers
-from logger import log
+import logger
 import news_interface
 import news_orgs
-import api_keys
-
-logging.basicConfig(filename='cbc.log', level=logging.WARNING)
 
 
 class CBC(news_interface.NewsOrg):
   '''Methods for interacting with the CBC website.'''
 
-  def get_article(self, url):
-    '''Implementation for getting an article from the CBC.
+  def __init__(self):
+    self.news_org = news_orgs.CBC
+    self.search_url = 'http://search.cbc.ca/search?site=2011-News&output=xml_no_dtd&ie=utf8&oe=utf8&safe=high&getfields=*&client=cbc-global&proxystylesheet=cbc-global&proxyreload=1&q=%s'
 
-    url: A URL in the cbc.ca/news/* domain.
+  def __repr__(self):
+    return self.news_org
 
-    Returns: The Article representing the article at that url, or None if
-    unable to scrape the article.
-    '''
-    html = helpers.get_content(url)
-    if not html:
-      return None
-
-    soup = BeautifulSoup(html)
-
+  def get_headline(self, soup):
     try:
       headline = soup.h1.string
     except AttributeError:
-      log.error('Exception trying to scrape CBC headline from %s'
+      logger.log.error('Exception trying to scrape CBC headline from %s'
                 % (url))
       return None
+    return headline
 
+  def get_body(self, soup):
     article = soup.find('div', attrs={'class': 'story-content'})
     paragraphs = article.find_all('p', attrs={'class': None})
     body = ' '.join([p.get_text() for p in paragraphs])
-    log.info(headline)
-    log.info(body)
-    return news_interface.Article(headline, body, url, news_orgs.CBC)
+    return body
 
-  def get_query_results(self, query):
-    '''Implementation for getting an article from the CBC.
+  def get_date(self, soup):
+    date = soup.find('span', attrs={'class': 'delimited'}).string
+    return date
 
-    query: A URL-encoded string.
-
-    Returns: A list of the top Articles returned by the query search.
-    '''
-    res = requests.get(
-        'http://search.cbc.ca/search?site=2011-News&output=xml_no_dtd&ie=utf8&oe=utf8&safe=high&getfields=*&client=cbc-global&proxystylesheet=cbc-global&proxyreload=1&q=%s'
-        % (query))
-    soup = BeautifulSoup(res.text)
+  def process_search_results(self, raw_results):
+    soup = BeautifulSoup(raw_results.text)
     articles = soup.find_all('p', attrs={'class': 'g'})
     article_urls = [article.a.get('href') for article in articles]
-
-    top_articles = []
-    for url in article_urls[0:news_interface.NUM_ARTICLES]:
-        top_articles.append(self.get_article(url))
-    return top_articles
+    return article_urls

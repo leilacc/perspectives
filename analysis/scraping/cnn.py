@@ -1,36 +1,26 @@
 from bs4 import BeautifulSoup
-import logging
-import requests
-import urllib2
 
-import helpers
-from logger import log
 import news_interface
 import news_orgs
 
-logging.basicConfig(filename='cnn.log', level=logging.WARNING)
 
 class CNN(news_interface.NewsOrg):
   '''Methods for interacting with the CNN website.'''
 
-  def get_article(self, url):
-    '''Implementation for getting an article from CNN.
+  def __init__(self):
+    self.news_org = news_orgs.CNN
+    self.search_url = "http://searchapp.cnn.com/search/query.jsp?page=1&npp=10&start=1&text=%s&type=all&bucket=true&sort=relevance&csiID=csi1"
 
-    Args:
-      url: A URL in the www.cnn.* domain.
+  def __repr__(self):
+    return self.news_org
 
-    Returns:
-      The Article representing the article at that url.
-    '''
-    html = helpers.get_content(url)
-    if not html:
-      return None
-
-    soup = BeautifulSoup(html)
+  def get_headline(self, soup):
     a = soup.find("title")
     k = a.text.split("-")
     headline = k[0]
-    date = k[1]
+    return headline
+
+  def get_body(self, soup):
     c = soup.findAll("p", attrs={'class': 'zn-body__paragraph'})
     body = ""
     for paragraph in c:
@@ -38,20 +28,16 @@ class CNN(news_interface.NewsOrg):
             body += paragraph.text.decode("utf-8").replace("\"","'") + " "
         except UnicodeEncodeError:
             pass
-    log.info(headline)
-    log.info(body)
-    return news_interface.Article(headline, body, url, news_orgs.CNN)
+    return body
 
-  def get_query_results(self, query):
-    '''Implementation for keyword searches from CNN.
+  def get_date(self, soup):
+    try:
+      date = soup.find('p', attrs={'class': 'update-time'}).string
+    except AttributeError:
+      date = soup.find('p', attrs={'class': 'metadata__data-added'}).string
+    return date
 
-    Args:
-      query: A URL-encoded string.
-
-    Returns:
-      A list of the top Articles returned by the query search.
-    '''
-    res = requests.get("http://searchapp.cnn.com/search/query.jsp?page=1&npp=10&start=1&text=%s&type=all&bucket=true&sort=relevance&csiID=csi1" % (query))
+  def process_search_results(self, res):
     output = res.text.encode('ascii', 'ignore').split("\"url\":")
 
     article_urls = []
@@ -62,8 +48,4 @@ class CNN(news_interface.NewsOrg):
           article_urls.append(a)
       except:
         pass
-
-    top_articles = []
-    for url in article_urls[0:news_interface.NUM_ARTICLES]:
-      top_articles.append(self.get_article(url))
-    return top_articles
+    return article_urls

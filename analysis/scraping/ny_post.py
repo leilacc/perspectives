@@ -1,15 +1,8 @@
 from bs4 import BeautifulSoup
-import json
-import logging
-import requests
 
 import helpers
-from logger import log
 import news_interface
 import news_orgs
-import api_keys
-
-logging.basicConfig(filename='ny_post.log', level=logging.WARNING)
 
 
 class NYPost(news_interface.NewsOrg):
@@ -21,40 +14,30 @@ class NYPost(news_interface.NewsOrg):
   >>> nyp.get_article('http://nypost.com/2015/01/25/paris-terrorists-fit-profile-of-homegrown-threat-described-in-2007-nypd-report/')
   '''
 
-  def get_article(self, url):
-    '''Implementation for getting an article from the New York Post.
+  def __init__(self):
+    self.news_org = news_orgs.NY_POST
+    self.search_url = 'http://nypost.com/?s=%s'
 
-    url: A URL in the nypost.com domain.
+  def __repr__(self):
+    return self.news_org
 
-    Returns: The Article representing the article at that url.
-    '''
-    html = helpers.get_content(url)
-    if not html:
-      return None
+  def get_headline(self, soup):
+    headline = soup.h1.a.string
+    return headline
 
-    soup = BeautifulSoup(html)
-    headline = helpers.decode(soup.h1.a.string)
+  def get_body(self, soup):
     article = soup.find('div', attrs={'class': 'entry-content'})
     paragraphs = article.find_all('p', attrs={'class': None})
     body = ' '.join(
         [helpers.decode(p.get_text()) for p in paragraphs])
-    log.info(headline)
-    log.info(body)
-    return news_interface.Article(headline, body, url, news_orgs.NY_POST)
+    return body
 
-  def get_query_results(self, query):
-    '''Implementation for getting an article from the New York Post.
+  def get_date(self, soup):
+    date = soup.find('p', attrs={'class': 'byline-date'}).string
+    return date
 
-    query: A URL-encoded string.
-
-    Returns: A list of the top Articles returned by the query search.
-    '''
-    res = requests.get('http://nypost.com/?s=%s' % (query))
+  def process_search_results(self, res):
     soup = BeautifulSoup(res.text)
-    articles = soup.find_all('article')
+    articles = soup.find_all('article', attrs={'class': 'article'})
     article_urls = [article.h3.a.get('href') for article in articles]
-
-    top_articles = []
-    for url in article_urls[0:news_interface.NUM_ARTICLES]:
-        top_articles.append(self.get_article(url))
-    return top_articles
+    return article_urls

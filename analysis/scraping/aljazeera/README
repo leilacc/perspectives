@@ -1,3 +1,6 @@
+DEPRECATED - this is what we used to prototype during the hackathon
+--------------------------------------------------------------------------------
+
 To run this code, enter "sh script" in command line
 All output appears in output_json_files in json format
 The files in the hard_coded_input directory have been hardcoded because of scraping limitations. As soon as I figure out a way to automate the scraping I will plug it into the pipeline

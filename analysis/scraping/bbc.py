@@ -1,54 +1,35 @@
 from bs4 import BeautifulSoup
-import json
-import logging
-import requests
 
-from api_keys import api_keys
-import helpers
-from logger import log
 import news_interface
 import news_orgs
 
-logging.basicConfig(filename='bbc.log', level=logging.WARNING)
 
 class BBC(news_interface.NewsOrg):
   '''Methods for interacting with the BBC website.'''
 
-  def get_article(self, url):
-    '''Implementation for getting an article from BBC.
+  def __init__(self):
+    self.news_org = news_orgs.BBC
+    self.search_url = 'http://www.bbc.co.uk/search?q=%s&sa_f=search-serp&filter=news'
 
-    url: A URL in the www.bbc.* domain.
+  def __repr__(self):
+    return self.news_org
 
-    Returns: The Article representing the article at that url.
-    '''
-    html = helpers.get_content(url)
-    if not html:
-      return None
-
-    soup = BeautifulSoup(html)
+  def get_headline(self, soup):
     headline = soup.h1.string
+    return headline
+
+  def get_body(self, soup):
     article = soup.find('div', attrs={'class': 'story-body'})
     paragraphs = article.find_all('p', attrs={'class': None})
     body = ' '.join([p.get_text() for p in paragraphs])
-    log.info(headline)
-    log.info(body)
-    return news_interface.Article(headline, body, url, news_orgs.BBC)
+    return body
 
-  def get_query_results(self, query):
-    '''Implementation for keyword searches from BBC.
+  def get_date(self, soup):
+    date = soup.find('span', attrs={'class': 'date'}).string
+    return date
 
-    query: A URL-encoded string.
-
-    Returns: A list of the top Articles returned by the query search.
-    '''
-    res = requests.get(
-        'http://www.bbc.co.uk/search?q=%s&sa_f=search-serp&filter=news'
-        % (query))
+  def process_search_results(self, res):
     soup = BeautifulSoup(res.text)
     articles = soup.find_all('article')
     article_urls = [article.h1.a.get('href') for article in articles]
-
-    top_articles = []
-    for url in article_urls[0:news_interface.NUM_ARTICLES]:
-        top_articles.append(self.get_article(url))
-    return top_articles
+    return article_urls

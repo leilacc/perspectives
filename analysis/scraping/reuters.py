@@ -1,50 +1,35 @@
 from bs4 import BeautifulSoup
-import logging
-import requests
 
-import helpers
-from logger import log
 import news_interface
 import news_orgs
 
-logging.basicConfig(filename='reuters.log', level=logging.WARNING)
 
 class Reuters(news_interface.NewsOrg):
   '''Methods for interacting with the REUTERS website.'''
 
-  def get_article(self, url):
-    '''Implementation for getting an article from REUTERS.
+  def __init__(self):
+    self.news_org = news_orgs.REUTERS
+    self.search_url = 'http://www.reuters.com/search?blob=%s'
 
-    url: A URL in the www.reuters.com* domain.
+  def __repr__(self):
+    return self.news_org
 
-    Returns: The Article representing the article at that url.
-    '''
-    html = helpers.get_content(url)
-    if not html:
-      return None
+  def get_headline(self, soup):
+    headline_div = soup.find('div',
+                             attrs={'class': 'column1 gridPanel grid8'})
+    headline = headline_div.h1.string
+    return headline
 
-    soup = BeautifulSoup(html)
-    headline_div = soup.find('div', attrs={'class': 'column1 gridPanel grid8'})
-    headline = helpers.decode(headline_div.h1.string)
-    paragraphs = soup.find('div', attrs={'class': 'column1 gridPanel grid8'}).findAll("p")
-    body = ' '.join([helpers.decode(p.text) for p in paragraphs])
-    log.info(headline)
-    log.info(body)
-    return news_interface.Article(headline, body, url, news_orgs.REUTERS)
+  def get_body(self, soup):
+    body = soup.find('span', attrs={'id': 'articleText'}).getText()
+    return body
 
-  def get_query_results(self, query):
-    '''Implementation for keyword searches from REUTERS.
+  def get_date(self, soup):
+    date = soup.find('span', attrs={'class': 'timestamp'}).string
+    return date
 
-    query: A URL-encoded string.
-
-    Returns: A list of the top Articles returned by the query search.
-    '''
-    res = requests.get('http://www.reuters.com/search?blob=%s' % (query))
+  def process_search_results(self, res):
     soup = BeautifulSoup(res.text)
     articles = soup.findAll('li', attrs={'class': 'searchHeadline'})
     article_urls = [article.a.get('href') for article in articles]
-
-    top_articles = []
-    for url in article_urls[0:news_interface.NUM_ARTICLES]:
-        top_articles.append(self.get_article(url))
-    return top_articles
+    return article_urls
