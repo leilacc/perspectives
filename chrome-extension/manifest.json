@@ -2,7 +2,7 @@
   "name": "Perspectives",
   "version": "0.0.1",
   "manifest_version": 2,
-  "description": "Behold, pure awesomeness",
+  "description": "Discover different takes on news events",
   "homepage_url": "https://github.com/leilacc/perspectives",
   "icons": {
     "16": "icons/icon16.png",
@@ -10,18 +10,24 @@
     "128": "icons/icon128.png"
   },
   "default_locale": "en",
-  "background": {
-    "scripts": [
-      "background.js"
-    ],
-    "persistent": true
+//  "background": {
+//    "scripts": [
+//      "background.js"
+//    ],
+//    "persistent": true
+//  },
+  "background":{
+    "page": "background.html"
   },
   "browser_action": {
     "default_icon": "icons/icon128.png",
     "default_title": "Read more on this topic via Perspectives"
   },
+  "web_accessible_resources": [
+    "/icons/cog.svg"
+  ],
   "permissions": [
-      "activeTab", "contextMenus", "http://*/*", "https://*/*"
+      "activeTab", "contextMenus","http://fonts.googleapis.com/css?family=Fjord+One", "tabs", "http://52.1.96.53/*"
   ],
   "options_page": "options.html"
 }

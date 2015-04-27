@@ -1,8 +1,25 @@
-body {
+@import url(http://fonts.googleapis.com/css?family=Fjord+One);
+
+html {
+    box-sizing: border-box;
+    min-width: 100vh;
+    min-height: 100vh;
+    overflow: hidden;
+}
+
+
+#currentpage {
     margin: 0;
     padding: 0;
-    transition: transform 0.2s ease-out;
-    transform: translateX(-30vw);
+    transition: all 0.15s ease-in-out;
+    transform-origin: center top;
+    width: 100%;
+    height: 100vh;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    top: 0%;
+    position: absolute;
+    left: 0%;
 }
 
 #perspectives-side {
@@ -14,24 +31,163 @@ body {
     right: 0;
     height: 10000000vh;
     padding: 0;
-    width: 30vw;
+    width: 330px;
+    height: 100vh;
+    overflow-y: scroll;
+    background-color: #1C2128;
     z-index: 2147483647;
-    background-color: #262626;
+    padding: 21px 21px 21px 0;
+    margin: 0;
+    transform: translateX(280px);
+}
+
+#perspectives-side footer {
+    display: block;
+    position: fixed;
+    top: auto;
+    right: auto;
+    bottom: 0px;
+    left: 0px;
+    width: 100%;
+    height: 10vh;
+    text-align: right;
+    background-image: linear-gradient(-180deg, rgba(27,33,40,0.00) 30%, #1C2128 100%);
+    pointer-events: none;
+}
+
+#perspectives-side.show ~ #currentpage {
+    transform: translate(-330px,0);
+}
+
+#perspectives-side.show {
+    -webkit-animation: perspectives-slidein 0.2s ease-out 0s 1 both;
+}
+
+#perspectives-side:hover {
+    transform: translateX(0px);
+}
+
+@-webkit-keyframes perspectives-slidein {
+    from {transform: translateX(330px)}
+    to {transform: translateX(0px)}
 }
 
 #perspectives-side h2 {
     color: #fff;
 }
 
-#perspectives-side ul {
-    padding: 0;
+#perspectives-side li {
+    box-sizing: border-box;
+    position: relative;
+    list-style-type: none;
+    transform: translateX(330px);
+    transition: all 0.2s ease-in;
     margin: 0;
+    padding: 0 0 0 22px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    /*max-height: 500px;*/
+    cursor: pointer;
+    border-left: 4px #1C2128 solid;
+    border-collapse: separate;
 }
 
-#perspectives-side li {
-    padding: 1em 3em;
-    height: calc(100vh / 8);
-    list-style-type: none;
-    transform: translateX(30vw);
-    transition: all 0.2s ease-in;
+#perspectives-side li:hover:before {
+    border-left: 5px #00BDFF solid;
+    content: "";
+    height: calc(100% - 44px);
+    transform: translateX(-26px);
+    position: absolute;
+    transition: height 0.2s;
 }
+
+#perspectives-side li:after {
+    margin: 22px 0;
+    content: "";
+    border-left: none;
+    border-bottom: 1px dashed rgba(255,255,255,0.2);
+}
+
+#perspectives-side li:first-child {
+    padding-top: 0;
+}
+
+#perspectives p{
+    font-family: 'Fjord One', serif;
+    color: #fff;
+    font-size: 15px;
+    line-height: 22px;
+    margin: 0;
+    text-shadow: none;
+}
+
+#perspectives p:not(.details){
+    padding-right: 2em;
+}
+
+#perspectives .details {
+    color: #666666;
+}
+
+#perspectives p b {
+    color: #00BDFF;
+    font-weight: normal;
+}
+
+#perspectives h2 {
+    font-family: GT Haptik Trial;
+    font-weight: 500;
+    color: #00BDFF;
+    font-size: 21px;
+    line-height: 33px;
+    margin-top: 0;
+    margin-bottom: 22px;
+    padding-right: 2em;
+    text-shadow: none;
+}
+
+#perspectives .pull-right {
+    float: right;
+}
+
+/*#perspectives .hidden-on-hover, #perspectives .visible-on-hover {*/
+    /*width: 100%;*/
+    /*overflow: hidden;*/
+/*}*/
+
+/*#perspectives .hidden-on-hover {*/
+    /*flex-grow: 1;*/
+    /*max-height: 0;*/
+    /*flex-basis: inherit;*/
+    /*transition: all 0.2s ease-out 0s;*/
+/*}*/
+
+/*#perspectives li:hover > .hidden-on-hover {*/
+    /*overflow: hidden;*/
+    /*max-height: 0px;*/
+    /*-webkit-animation: perspectives-slideup-hide 0.2s ease-out 0.1s 1 both;*/
+/*}*/
+
+/*#perspectives .visible-on-hover {*/
+    /*max-height: 0px;*/
+    /*overflow: hidden;*/
+    /*transition: all 0.2s ease-out 0.2s;*/
+/*}*/
+
+/*#perspectives li:hover > .visible-on-hover {*/
+    /*flex-grow: 1;*/
+    /*min-height: inherit;*/
+    /*max-height: 60vh;*/
+    /*-webkit-animation: perspectives-slideup 0.2s ease-out 0.2s 1 both;*/
+/*}*/
+
+/*@-webkit-keyframes perspectives-slideup-hide {*/
+    /*from {transform: translateY(0%);}*/
+    /*to {transform: translateY(-100%);}*/
+/*}*/
+
+/*@-webkit-keyframes perspectives-slideup {*/
+    /*from {transform: translateY(100%)}*/
+    /*to {transform: translateY(0%)}*/
+/*}*/
