@@ -266,6 +266,7 @@ def compare_articles(a1_NP_to_sentence, a1_VP_to_sentence,
                   highlighted_sentences, NP=False)
 
   comparison_results = comparison_article.to_dict()
+  comparison_results.pop('body', None)
   comparison_results['sentences'] = highlighted_sentences.values()
   if comparison_results['sentences']:
     return comparison_results
