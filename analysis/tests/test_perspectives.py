@@ -20,7 +20,6 @@ class TestPerspectives(unittest.TestCase):
     res = json.loads(perspectives.get_perspectives(url))
     self.assertEqual(res, {'Error': 'Not a recognized article'})
 
-    '''
   def test_query_all_news_orgs(self):
     query = 'charlie+hebdo'
     articles = perspectives.query_all_news_orgs(query)
@@ -51,7 +50,7 @@ class TestPerspectives(unittest.TestCase):
 
   def test_url_to_article_cnn(self):
     url = 'http://www.cnn.com/2015/01/31/entertainment/taiwan-scorcese-movie-set-accident/index.html'
-    headline = "One killed, 2 injured on set of Martin Scorsese's movie 'Silence'"
+    headline = "Deadly accident on set of new Scorcese movie 'Silence'"
     self._test_url_to_article(url, headline)
 
   def test_url_to_article_globe_and_mail(self):
@@ -71,7 +70,7 @@ class TestPerspectives(unittest.TestCase):
 
   def test_url_to_article_jpost(self):
     url = 'http://www.jpost.com/Opinion/Irans-nuclear-program-is-a-threat-389579'
-    headline = "Irans nuclear program is a threat"
+    headline = "Iran's nuclear program is a threat"
     self._test_url_to_article(url, headline)
 
   def test_url_to_article_ny_post(self):
