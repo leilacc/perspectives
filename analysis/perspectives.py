@@ -3,6 +3,7 @@
 import futures
 import json
 import re
+import urllib
 
 from nltk.corpus import wordnet as wn
 
@@ -41,11 +42,15 @@ def get_article_phrases(body, org):
   VP_synsets = compare_articles.get_synsets_and_ancestors(VPs, NP=False)
   return (NP_to_sentence, VP_to_sentence, NPs, VPs, NP_synsets, VP_synsets)
 
+def urldecode(url):
+  '''Decode URLencoded url.'''
+  return urllib.unquote(url).decode('utf8')
+
 def get_perspectives(url):
   '''Get different perspectives on the topic covered by article.
 
   Args:
-    url: A string.
+    url: A URLencoded string.
 
   Returns:
     A JSON-encoded string representing other articles with different
@@ -55,7 +60,7 @@ def get_perspectives(url):
     attribute. 'sentences' contains a list of sentences with semantically
     different words that were extracted from the corresponding article's body.
   '''
-  article = url_to_article(url)
+  article = url_to_article(urldecode(url))
   if article:
     headline = article.headline
     body = article.body
