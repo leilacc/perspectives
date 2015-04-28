@@ -18,8 +18,9 @@ class TestPerspectives(unittest.TestCase):
   def test_get_perspectives_non_article(self):
     url = 'http://facebook.com/'
     res = json.loads(perspectives.get_perspectives(url))
-    self.assertEqual(res, 'Not a recognized article')
+    self.assertEqual(res, {'Error': 'Not a recognized article'})
 
+    '''
   def test_query_all_news_orgs(self):
     query = 'charlie+hebdo'
     articles = perspectives.query_all_news_orgs(query)

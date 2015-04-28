@@ -80,7 +80,7 @@ def get_perspectives(url):
                                    for article in org_articles]
       return json.dumps(compared_articles)
   else:
-    return json.dumps("Not a recognized article")
+    return json.dumps({"Error": "Not a recognized article"})
 
 def get_comparison(news_org, article_topic, NP_to_sentence, VP_to_sentence,
                    NPs, VPs, NP_synsets, VP_synsets, article):
