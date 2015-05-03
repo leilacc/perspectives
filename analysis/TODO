@@ -1,0 +1,14 @@
+-fix USA Today api results when there are no search results
+-embed.ly
+-fix failing scraping test cases
+-add tf-idf to semantic differential analysis
+-usage of 2nd or 3rd wn synset since first might be wrong
+  -ie 'vessel' different from 'ship'
+-get rid of one of the logger files
+-documentation
+  -to run tests, in analysis dir run: python -m unittest tests.test_perspectives
+  -JSON output format
+-how to scale
+-how to deal with request versioning
+-CI testing for scraping
+-add more news orgs (look into how Google News does it)
