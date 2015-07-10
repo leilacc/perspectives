@@ -73,10 +73,11 @@ def get_perspectives(url):
 
     n = len(NEWS_ORGS)
     with futures.ProcessPoolExecutor(max_workers=n) as executor:
-      comparisons = executor.map(get_comparison, NEWS_ORGS, [article_topic]*n,
+      comparisons = executor.map(get_comparison, NEWS_ORGS,
                                  [NP_to_sentence]*n, [VP_to_sentence]*n,
                                  [NPs]*n, [VPs]*n,
-                                 [NP_synsets]*n, [VP_synsets]*n)
+                                 [NP_synsets]*n, [VP_synsets]*n,
+                                 [article_topic]*n, [headline]*n, [org]*n)
       compared_articles_by_org = list(comparisons)
       # flatten from list of lists of articles (separated by news org) to list
       # of articles
@@ -86,8 +87,9 @@ def get_perspectives(url):
   else:
     return json.dumps({"Error": "Not a recognized article"})
 
-def get_comparison(news_org, article_topic, NP_to_sentence, VP_to_sentence,
-                   NPs, VPs, NP_synsets, VP_synsets):
+def get_comparison(news_org, NP_to_sentence, VP_to_sentence,
+                   NPs, VPs, NP_synsets, VP_synsets,
+                   article_topic, article_headline, article_news_org):
   '''Compares the articles from a single NewsOrg to an article that is
   represented by its NPs and VPs.'''
   # synsets aren't picklable so they're stored as (pos, offset) and unpacked
@@ -101,6 +103,11 @@ def get_comparison(news_org, article_topic, NP_to_sentence, VP_to_sentence,
     return []
   comparisons = []
   for comparison_article in comparison_articles:
+    if (news_org == article_news_org and
+        comparison_article.headline == article_headline):
+      # comparison_article is likely the same as the original article
+      # do not compare
+      pass
     try:
       comparison = compare_articles.compare_articles(NP_to_sentence,
                                                      VP_to_sentence, NPs, VPs,
