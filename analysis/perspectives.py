@@ -100,6 +100,7 @@ def get_comparison(news_org, NP_to_sentence, VP_to_sentence,
 
   comparison_articles = news_org.get_query_results(article_topic)
   if not comparison_articles:
+    logger.log.warning("No comparison articles for %s" % news_org)
     return []
   comparisons = []
   for comparison_article in comparison_articles:

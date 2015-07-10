@@ -11,7 +11,7 @@ import news_orgs
 NUM_ARTICLES = 2
 
 logging.basicConfig(filename='%s/scraping.log' % logger.cwd,
-                    level=logging.DEBUG,
+                    level=logging.WARNING,
                     format=logger.fmt, datefmt=logger.datefmt)
 
 
