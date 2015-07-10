@@ -20,14 +20,6 @@ class TestPerspectives(unittest.TestCase):
     res = json.loads(perspectives.get_perspectives(url))
     self.assertEqual(res, {'Error': 'Not a recognized article'})
 
-  def test_query_all_news_orgs(self):
-    query = 'charlie+hebdo'
-    articles = perspectives.query_all_news_orgs(query)
-    self.assertTrue(len(articles) > 10)
-    for article in articles:
-      if article:
-        self.assertTrue(isinstance(article, news_interface.Article))
-
   def _test_url_to_article(self, url, headline):
     article = perspectives.url_to_article(url)
     self.assertTrue(isinstance(article, news_interface.Article))

@@ -119,24 +119,6 @@ def get_comparison(news_org, NP_to_sentence, VP_to_sentence,
       continue
   return comparisons
 
-def query_all_news_orgs(query):
-  '''Get the top articles for the given query from all supported news orgs.
-
-  Args:
-    query: A string of keywords.
-
-  Returns:
-    A list of Articles.
-  '''
-  top_articles = []
-  for news_org in NEWS_ORGS: #TODO: parallelize
-    try:
-      top_articles.extend(news_org.get_query_results(query))
-    except TypeError as e:
-      logger.log.error('Error getting query results for %s: %s' %
-                       (news_org, e))
-  return top_articles
-
 def url_to_article(url):
   '''Returns the Article at url if the url is supported.
 
