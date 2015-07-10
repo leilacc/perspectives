@@ -31,8 +31,8 @@ TODAYS_ZAMAN = todays_zaman.TodaysZaman()
 USA_TODAY = usa_today.USAToday()
 
 NEWS_ORGS = [AL_JAZEERA, BBC, CBC, CNN, GLOBE_AND_MAIL, GUARDIAN, HUFF_POST,
-            JPOST, NY_POST, NY_TIMES, REUTERS, RT, TIMES_OF_ISRAEL,
-            TODAYS_ZAMAN, USA_TODAY]
+             JPOST, NY_POST, NY_TIMES, REUTERS, RT, TIMES_OF_ISRAEL,
+             TODAYS_ZAMAN, USA_TODAY]
 
 def get_article_phrases(body, org):
   NP_to_sentence, VP_to_sentence = compare_articles.get_phrases(body, org)
