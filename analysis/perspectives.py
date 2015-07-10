@@ -82,7 +82,7 @@ def get_perspectives(url):
       # flatten from list of lists of articles (separated by news org) to list
       # of articles
       compared_articles = [article for org_articles in compared_articles_by_org
-                                   for article in org_articles if article]
+                           for article in org_articles if article]
       return json.dumps(compared_articles)
   else:
     return json.dumps({"Error": "Not a recognized article"})
