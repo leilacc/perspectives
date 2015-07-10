@@ -76,8 +76,7 @@ def get_perspectives(url):
       comparisons = executor.map(get_comparison, NEWS_ORGS, [article_topic]*n,
                                  [NP_to_sentence]*n, [VP_to_sentence]*n,
                                  [NPs]*n, [VPs]*n,
-                                 [NP_synsets]*n, [VP_synsets]*n,
-                                 [1]*n)
+                                 [NP_synsets]*n, [VP_synsets]*n)
       compared_articles_by_org = list(comparisons)
       # flatten from list of lists of articles (separated by news org) to list
       # of articles
@@ -88,7 +87,7 @@ def get_perspectives(url):
     return json.dumps({"Error": "Not a recognized article"})
 
 def get_comparison(news_org, article_topic, NP_to_sentence, VP_to_sentence,
-                   NPs, VPs, NP_synsets, VP_synsets, article):
+                   NPs, VPs, NP_synsets, VP_synsets):
   '''Compares the articles from a single NewsOrg to an article that is
   represented by its NPs and VPs.'''
   # synsets aren't picklable so they're stored as (pos, offset) and unpacked
