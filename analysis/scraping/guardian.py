@@ -11,8 +11,9 @@ class Guardian(news_interface.NewsOrg):
 
   def __init__(self):
     self.news_org = news_orgs.GUARDIAN
-    self.search_url = ('http://content.guardianapis.com/search?q=%s&api-key=' +
-                       api_keys.api_keys[news_orgs.GUARDIAN])
+    self.search_url = ('http://www.google.com/cse?oe=utf8&ie=utf8&source=uds&'
+                       'q=%s&start=0&sort=&'
+                       'cx=007466294097402385199:m2ealvuxh1i')
 
   def __repr__(self):
     return self.news_org
@@ -34,6 +35,7 @@ class Guardian(news_interface.NewsOrg):
     return date
 
   def process_search_results(self, res):
-    results = json.loads(res.text)['response']['results']
-    article_urls = [res['webUrl'] for res in results]
+    soup = BeautifulSoup(res.text)
+    all_as = soup.find_all('a', attrs={'class': 'l'})
+    article_urls = [a.get('href') for a in all_as]
     return article_urls
