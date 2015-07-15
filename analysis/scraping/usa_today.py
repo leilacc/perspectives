@@ -1,4 +1,4 @@
-import xmltodict
+from bs4 import BeautifulSoup
 
 import api_keys
 import helpers
@@ -12,8 +12,7 @@ class USAToday(news_interface.NewsOrg):
 
   def __init__(self):
     self.news_org = news_orgs.USA_TODAY
-    self.search_url = ("http://api.usatoday.com/open/articles?keyword=%s&" +
-                       "api_key=" + api_keys.api_keys[news_orgs.USA_TODAY])
+    self.search_url = ("http://www.usatoday.com/search/%s/")
 
   def __repr__(self):
     return self.news_org
@@ -34,11 +33,9 @@ class USAToday(news_interface.NewsOrg):
     return date
 
   def process_search_results(self, res):
-    xml_dict = xmltodict.parse(res.text)
-
-    try:
-      all_articles = xml_dict['rss']['channel']['item']
-    except KeyError:
-      logger.log.error(res.text)
-
-    return [article['link'] for article in all_articles]
+    soup = BeautifulSoup(res.text)
+    results = soup.find_all('li', attrs={'class': 'search-result-item'})
+    relative_urls = [result.a.get('href') for result in results if result.a]
+    article_urls = ['http://usatoday.com' + relative_url
+                    for relative_url in relative_urls]
+    return article_urls
