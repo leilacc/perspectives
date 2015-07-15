@@ -1,5 +1,5 @@
--fix USA Today api results when there are no search results
--embed.ly
+-add more news orgs (look into how Google News does it)
+  -embed.ly/newspaper/python-goose
 -fix failing scraping test cases
 -add tf-idf to semantic differential analysis
 -usage of 2nd or 3rd wn synset since first might be wrong
@@ -11,4 +11,3 @@
 -how to scale
 -how to deal with request versioning
 -CI testing for scraping
--add more news orgs (look into how Google News does it)
